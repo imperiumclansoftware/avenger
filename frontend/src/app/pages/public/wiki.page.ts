@@ -16,19 +16,19 @@ import { ProductContext } from './product-context';
           <ul>
             @for (p of product.wikiPages; track p.id) {
               <li>
-                <a [routerLink]="['/produits', product.slug, 'wiki', p.slug]" routerLinkActive="active">{{ p.title }}</a>
+                <a [routerLink]="['/produits', product.slug, 'wiki', p.slug]" routerLinkActive="active" ariaCurrentWhenActive="page">{{ p.title }}</a>
               </li>
             }
           </ul>
         </nav>
         <article class="card">
           @if (error()) {
-            <p class="error">{{ error() }}</p>
+            <p class="state error" role="alert">{{ error() }}</p>
           } @else if (wikiPage(); as wikiPage) {
             <app-markdown [content]="wikiPage.content" />
             <p class="muted updated">Mis à jour le {{ date(wikiPage.updatedAt) }}</p>
           } @else {
-            <p class="muted">Chargement…</p>
+            <p class="state muted" role="status">Chargement de la page…</p>
           }
         </article>
       </div>
@@ -54,16 +54,24 @@ import { ProductContext } from './product-context';
       display: block;
       padding: 0.35rem 0.6rem;
       border-radius: var(--radius);
-      color: var(--text);
+      color: var(--text-muted);
       text-decoration: none;
 
+      &:hover {
+        color: var(--text);
+        background: var(--surface);
+      }
+
       &.active {
+        color: var(--text);
         background: var(--surface-alt);
         font-weight: 600;
       }
     }
     .updated {
-      margin-bottom: 0;
+      margin: 2rem 0 0;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
       font-size: 0.85rem;
     }
   `,

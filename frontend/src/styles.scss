@@ -35,6 +35,13 @@
   box-sizing: border-box;
 }
 
+html {
+  /* Browser surfaces in the theme: scrollbars, caret, native controls */
+  scrollbar-color: var(--border-input) var(--bg);
+  accent-color: var(--accent);
+  caret-color: var(--accent-bright);
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -44,6 +51,29 @@ body {
   font-size-adjust: from-font;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgb(61 134 255 / 0.4);
+  color: var(--text);
+}
+
+/* Controls use the page's font, not the browser's */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* Read by screen readers only */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 a {
@@ -84,6 +114,10 @@ p {
   color: var(--danger);
 }
 
+.success {
+  color: var(--success);
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -91,16 +125,51 @@ p {
   padding: 1.25rem 1.5rem;
 }
 
-/* Small pill above section titles */
-.eyebrow {
+/* "← Produits": the link back to the parent page */
+.back {
+  margin: 0 0 1rem;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+}
+
+/* Loading, empty and error messages of a page or list */
+.state {
+  margin: 0;
+  padding: 1rem 0;
+
+  /* A message followed by the way out: "Voir tous les tickets" */
+  &.empty {
+    display: grid;
+    justify-items: start;
+    gap: 0.75rem;
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+/* Something to know before going on: a colored outline, the text says what */
+.note {
+  margin: 0;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--warning);
+  border-radius: 0.6rem;
+  color: var(--warning);
+  font-size: 0.9rem;
+}
+
+/* Icons drawn in the stroke of the brand mark (shared/icon.ts) */
+app-icon {
   display: inline-block;
-  padding: 0.2rem 0.8rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  background: var(--surface);
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  letter-spacing: 0.02em;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
 }
 
 /* Buttons */
@@ -119,9 +188,13 @@ p {
   text-decoration: none;
   cursor: pointer;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: var(--accent-bright);
     background: var(--surface-alt);
+  }
+
+  &:active:not(:disabled) {
+    translate: 0 1px;
   }
 
   &:disabled {
@@ -135,16 +208,20 @@ p {
     color: var(--accent-contrast);
     box-shadow: var(--glow);
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: var(--accent-strong);
       border-color: var(--accent-strong);
+    }
+
+    &:disabled {
+      box-shadow: none;
     }
   }
 
   &.danger {
     color: var(--danger);
 
-    &:hover {
+    &:hover:not(:disabled) {
       border-color: var(--danger);
     }
   }
@@ -161,8 +238,8 @@ p {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .btn,
   .card,
+  .chips a,
   .tabs-nav a {
     transition:
       background-color 0.2s,
@@ -171,13 +248,30 @@ p {
       color 0.2s;
   }
 
-  .btn .arrow {
-    transition: translate 0.2s;
+  .btn {
+    transition:
+      background-color 0.2s,
+      border-color 0.2s,
+      box-shadow 0.2s,
+      color 0.2s,
+      translate 0.1s;
   }
 
-  .btn:hover .arrow {
+  .btn .arrow {
+    transition: translate 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn:hover:not(:disabled) .arrow {
     translate: 0.2rem 0;
   }
+}
+
+/* Numbers that line up: counts, dates, ticket numbers */
+.table,
+.badge,
+.count,
+dd {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Forms */
@@ -238,6 +332,41 @@ textarea {
 
 input[type='radio'] {
   accent-color: var(--accent);
+}
+
+/* A radio button drawn as a selectable box (ticket type, mail mode) */
+.choice {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--border-input);
+  }
+
+  &:has(input:checked) {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  }
+
+  &:has(:focus-visible) {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 2px;
+  }
+
+  /* The box carries the focus ring */
+  input:focus-visible {
+    outline: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .choice {
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+  }
 }
 
 .actions {
@@ -445,12 +574,11 @@ input[type='radio'] {
     box-shadow: var(--glow-soft);
   }
 
+  /* A quotation rule in the text color family, not an accent: quotes are not alerts */
   blockquote {
     margin-left: 0;
-    padding: 0.5rem 1rem;
-    border-left: 3px solid var(--accent);
-    border-radius: 0 0.5rem 0.5rem 0;
-    background: var(--bg-band);
+    padding: 0.25rem 0 0.25rem 1.1rem;
+    border-left: 2px solid var(--border-input);
     color: var(--text-muted);
   }
 
@@ -480,13 +608,27 @@ input[type='radio'] {
   }
 }
 
-/* Errors of a form field (shared/form-errors.ts) */
+/* Errors of a form field (shared/form-errors.ts), after the same alert icon as shared/icon.ts */
 .field-error {
   color: var(--danger);
   font-size: 0.875rem;
 
   &::before {
-    content: '⚠ ';
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: 0.35em;
+    vertical-align: -0.15em;
+    background: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7.5v5.5M12 16.5h.01'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+  }
+}
+
+@media (forced-colors: active) {
+  .field-error::before {
+    background: CanvasText;
   }
 }
 

@@ -1,8 +1,9 @@
-import { Component, DestroyRef, ElementRef, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, ElementRef, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { apiErrorMessage } from '../../core/api/api-error';
 import { Product, Ticket, TicketType } from '../../core/api/models';
 import { ProductsService } from '../../core/products/products.service';
+import { Icon } from '../../shared/icon';
 import { TicketForm, TicketPrefill } from '../../shared/ticket-form';
 import { HOST_SOURCE, HostPrefillMessage, WIDGET_SOURCE, WidgetMessage, httpOrigin } from './widget-protocol';
 
@@ -11,20 +12,22 @@ import { HOST_SOURCE, HostPrefillMessage, WIDGET_SOURCE, WidgetMessage, httpOrig
  */
 @Component({
   selector: 'app-widget-page',
-  imports: [TicketForm],
+  imports: [Icon, TicketForm],
   template: `
     @if (error()) {
       <p class="error" role="alert">{{ error() }}</p>
     } @else if (product(); as product) {
       @if (sent(); as ticket) {
         <div class="sent" role="status">
-          <h1>Merci, votre ticket a été envoyé</h1>
+          <h1 #sentTitle tabindex="-1"><app-icon class="done" name="check" /> Merci, votre ticket a été envoyé</h1>
           <p>
             Il porte le numéro <strong>#{{ ticket.number }}</strong>. L'équipe de {{ product.name }} vous répondra
             par e-mail si besoin.
           </p>
           <div class="actions">
-            <a class="btn" [href]="ticketUrl(ticket)" target="_blank" rel="noopener">Suivre le ticket ↗</a>
+            <a class="btn" [href]="ticketUrl(ticket)" target="_blank" rel="noopener">
+              Suivre le ticket <app-icon name="external" /><span class="visually-hidden"> (nouvel onglet)</span>
+            </a>
             <button class="btn" type="button" (click)="another()">Ouvrir un autre ticket</button>
             <button class="btn primary" type="button" (click)="post({ source: widget, type: 'close' })">Fermer</button>
           </div>
@@ -34,7 +37,7 @@ import { HOST_SOURCE, HostPrefillMessage, WIDGET_SOURCE, WidgetMessage, httpOrig
         <app-ticket-form [slug]="slug()" [prefill]="prefill()" [sourceUrl]="pageUrl()" [rows]="6" (created)="created($event)" />
       }
     } @else {
-      <p class="muted">Chargement…</p>
+      <p class="muted" role="status">Chargement du formulaire…</p>
     }
   `,
   styles: `
@@ -48,6 +51,24 @@ import { HOST_SOURCE, HostPrefillMessage, WIDGET_SOURCE, WidgetMessage, httpOrig
     }
     .sent {
       padding: 1rem 0;
+
+      h1 {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.75rem;
+
+        &:focus {
+          outline: none;
+        }
+      }
+
+      p {
+        margin: 0 0 1.25rem;
+      }
+    }
+    .done {
+      color: var(--success);
     }
   `,
 })
@@ -67,8 +88,11 @@ export class WidgetPage {
   protected readonly prefill = signal<TicketPrefill>({});
   protected readonly pageUrl = signal<string | null>(null);
   protected readonly sent = signal<Ticket | null>(null);
+  private readonly sentTitle = viewChild<ElementRef<HTMLElement>>('sentTitle');
 
   constructor() {
+    // The form is gone: keyboard and screen reader users go on from the confirmation
+    effect(() => this.sentTitle()?.nativeElement.focus());
     const window = this.document.defaultView!;
     const onMessage = (event: MessageEvent) => this.onHostMessage(event);
     window.addEventListener('message', onMessage);

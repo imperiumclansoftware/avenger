@@ -7,9 +7,10 @@
     var(--bg);
 
   h1 {
-    margin: 1rem 0;
+    margin: 0 0 1rem;
     font-size: clamp(2.25rem, 1.5rem + 3.5vw, 4rem);
     font-weight: 700;
+    letter-spacing: -0.02em;
   }
 
   .accent {
@@ -49,7 +50,7 @@
 .stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 2.5rem;
+  gap: 1.25rem 2.5rem;
   margin: 2.5rem 0 0;
 
   div {
@@ -102,7 +103,7 @@
   margin-bottom: 1.75rem;
 
   h2 {
-    margin: 0.75rem 0 0;
+    margin: 0;
     font-size: clamp(1.75rem, 1.3rem + 1.5vw, 2.5rem);
   }
 }
@@ -166,6 +167,9 @@
     a {
       position: relative;
       z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
     }
   }
 }

@@ -30,7 +30,7 @@ import { FormErrors } from '../../shared/form-errors';
         @if (error()) {
           <p class="error" role="alert">{{ error() }}</p>
         }
-        <button class="btn primary" type="submit" [disabled]="loading()">Se connecter</button>
+        <button class="btn primary" type="submit" [disabled]="loading()">{{ loading() ? 'Connexion…' : 'Se connecter' }}</button>
       </form>
     </main>
   `,

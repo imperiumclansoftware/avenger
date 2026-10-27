@@ -8,13 +8,16 @@
         l'application ; les tickets arrivent dans l'onglet <em>Tickets</em> de ce produit.
       </p>
       @if (!product.published) {
-        <p class="warning" role="note">
-          ⚠ Ce produit n'est pas publié : le widget affichera « produit introuvable » tant que vous ne l'aurez pas
+        <p class="note" role="note">
+          <app-icon name="alert" />
+          Ce produit n'est pas publié : le widget affichera « produit introuvable » tant que vous ne l'aurez pas
           publié (onglet <em>Page d'accueil</em>).
         </p>
       }
       <p class="actions">
-        <a class="btn" [href]="demoUrl()" target="_blank" rel="noopener">Essayer le widget ↗</a>
+        <a class="btn" [href]="demoUrl()" target="_blank" rel="noopener">
+          Essayer le widget <app-icon name="external" /><span class="visually-hidden"> (nouvel onglet)</span>
+        </a>
       </p>
     </section>
 

@@ -25,7 +25,7 @@ export interface TicketPrefill {
       <fieldset class="types">
         <legend>Type de ticket</legend>
         @for (t of types; track t.value) {
-          <label class="type card">
+          <label class="type choice">
             <input type="radio" formControlName="type" [value]="t.value" />
             <span>
               <strong>{{ t.label }}</strong>
@@ -47,8 +47,8 @@ export interface TicketPrefill {
       </div>
       <div class="field">
         <label for="description">Description</label>
-        <span class="hint">Pour un bug : ce que vous avez fait, ce qui s'est passé, ce que vous attendiez.</span>
-        <app-markdown-editor inputId="description" formControlName="description" [rows]="rows()" />
+        <span class="hint" id="description-hint">Pour un bug : ce que vous avez fait, ce qui s'est passé, ce que vous attendiez.</span>
+        <app-markdown-editor inputId="description" formControlName="description" [rows]="rows()" describedBy="description-hint description-error" [invalid]="!!errors.of('description')" />
         @if (errors.of('description'); as error) {
           <span class="field-error" id="description-error">{{ error }}</span>
         }
@@ -63,11 +63,11 @@ export interface TicketPrefill {
         </div>
         <div class="field">
           <label for="authorEmail">Votre e-mail</label>
-          <input id="authorEmail" type="email" formControlName="authorEmail" maxlength="180" autocomplete="email" [attr.aria-invalid]="!!errors.of('authorEmail')" aria-describedby="authorEmail-error" />
+          <input id="authorEmail" type="email" formControlName="authorEmail" maxlength="180" autocomplete="email" [attr.aria-invalid]="!!errors.of('authorEmail')" aria-describedby="authorEmail-error authorEmail-hint" />
           @if (errors.of('authorEmail'); as error) {
             <span class="field-error" id="authorEmail-error">{{ error }}</span>
           }
-          <span class="hint">Il n'est pas publié : il sert seulement à vous recontacter.</span>
+          <span class="hint" id="authorEmail-hint">Il n'est pas publié : il sert seulement à vous recontacter.</span>
         </div>
       </div>
       @if (sourceUrl(); as url) {
@@ -78,7 +78,7 @@ export interface TicketPrefill {
         <p class="error" role="alert">{{ error }}</p>
       }
       <div class="actions">
-        <button class="btn primary" type="submit" [disabled]="saving()">Envoyer</button>
+        <button class="btn primary" type="submit" [disabled]="saving()">{{ saving() ? 'Envoi…' : 'Envoyer' }}</button>
         <ng-content />
       </div>
     </form>
@@ -94,22 +94,22 @@ export interface TicketPrefill {
 
       legend {
         font-weight: 600;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.35rem;
       }
     }
     .type {
       display: flex;
       gap: 0.6rem;
       align-items: flex-start;
-      cursor: pointer;
-      padding: 0.75rem;
+      padding: 0.75rem 0.9rem;
 
-      &:has(input:checked) {
-        border-color: var(--accent);
+      input {
+        margin: 0.3rem 0 0;
       }
 
       span {
         display: grid;
+        gap: 0.1rem;
         font-size: 0.9rem;
       }
     }

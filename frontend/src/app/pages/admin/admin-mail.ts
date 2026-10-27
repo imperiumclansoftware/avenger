@@ -21,6 +21,7 @@ import {
   MailSettingsInput,
 } from '../../core/api/models';
 import { AuthService } from '../../core/auth/auth.service';
+import { Icon } from '../../shared/icon';
 
 type Status = { kind: 'success' | 'error'; message: string } | null;
 
@@ -118,7 +119,7 @@ const MODES: { id: MailMode; label: string }[] = [
 /** Mail service of the administration: server, sender and test. */
 @Component({
   selector: 'app-admin-mail',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, Icon],
   templateUrl: './admin-mail.html',
   styleUrl: './admin-mail.scss',
 })

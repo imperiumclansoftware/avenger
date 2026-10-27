@@ -20,7 +20,7 @@ import { ProductImportDialog } from './product-import-dialog';
     </div>
     <app-product-import-dialog #importDialog (imported)="imported($event)" />
     @if (error()) {
-      <p class="error">{{ error() }}</p>
+      <p class="state error" role="alert">{{ error() }}</p>
     } @else if (products(); as products) {
       @if (products.length) {
         <div class="table-wrap">
@@ -52,11 +52,14 @@ import { ProductImportDialog } from './product-import-dialog';
       } @else {
         <div class="card empty">
           <p>Aucun produit. Créez le premier : son wiki et ses files de tickets seront créés avec lui.</p>
-          <a class="btn primary" routerLink="/admin/produits/nouveau">Nouveau produit</a>
+          <div class="actions">
+            <a class="btn primary" routerLink="/admin/produits/nouveau">Nouveau produit</a>
+            <button class="btn" type="button" (click)="importDialog.open()">Importer un produit</button>
+          </div>
         </div>
       }
     } @else {
-      <p class="muted">Chargement…</p>
+      <p class="state muted" role="status">Chargement des produits…</p>
     }
   `,
   styles: `
@@ -66,9 +69,23 @@ import { ProductImportDialog } from './product-import-dialog';
       gap: 1rem;
       align-items: center;
       justify-content: space-between;
+      margin-bottom: 1.25rem;
+
+      h1 {
+        margin: 0;
+      }
     }
     .empty {
+      display: grid;
+      justify-items: center;
+      gap: 1rem;
+      padding-block: 2.5rem;
       text-align: center;
+
+      p {
+        max-width: 36rem;
+        margin: 0;
+      }
     }
     .name {
       display: inline-flex;

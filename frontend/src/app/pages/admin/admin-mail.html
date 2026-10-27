@@ -28,7 +28,7 @@
       <fieldset class="modes">
         <legend>Mode d'envoi</legend>
         @for (mo of modes; track mo.id) {
-          <label class="mode" [class.selected]="mode() === mo.id">
+          <label class="mode choice">
             <input type="radio" formControlName="mode" [value]="mo.id" /> {{ mo.label }}
           </label>
         }
@@ -53,7 +53,9 @@
                 >{{ p.hint }}
                 @if (p.link) {
                   <a [href]="p.link.url" target="_blank" rel="noopener noreferrer"
-                    >{{ p.link.label }} ↗</a
+                    >{{ p.link.label }} <app-icon name="external" /><span class="visually-hidden">
+                      (nouvel onglet)</span
+                    ></a
                   >
                 }
               </span>
@@ -181,12 +183,14 @@
                 href="https://symfony.com/doc/current/mailer.html#using-a-3rd-party-transport"
                 target="_blank"
                 rel="noopener noreferrer"
-                >liste de Symfony Mailer ↗</a
+                >liste de Symfony Mailer <app-icon name="external" /><span class="visually-hidden">
+                  (nouvel onglet)</span
+                ></a
               >
               (le paquet correspondant doit être installé). Encodez les caractères spéciaux (<code
                 >&#64;</code
               >
-              → <code>%40</code>).</span
+              s'écrit <code>%40</code>).</span
             >
           </div>
         }
@@ -234,7 +238,9 @@
         </p>
       }
       <div class="actions">
-        <button class="btn primary" type="submit" [disabled]="busy()">Enregistrer</button>
+        <button class="btn primary" type="submit" [disabled]="busy()">
+          {{ busy() === 'save' ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
       </div>
     </form>
 
@@ -264,11 +270,14 @@
           <ul class="checks" aria-live="polite">
             @for (item of c.checks; track item.label) {
               <li [class.ok]="item.ok">
-                <span aria-hidden="true">{{ item.ok ? '✓' : '✗' }}</span>
-                <strong>{{ item.label }}</strong>
-                @if (item.detail) {
-                  : {{ item.detail }}
-                }
+                <app-icon [name]="item.ok ? 'check' : 'cross'" />
+                <span
+                  ><strong>{{ item.label }}</strong
+                  ><span class="visually-hidden">{{ item.ok ? ' : réussi' : ' : échec' }}</span>
+                  @if (item.detail) {
+                    : {{ item.detail }}
+                  }
+                </span>
               </li>
             }
           </ul>

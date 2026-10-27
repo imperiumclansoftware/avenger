@@ -33,12 +33,12 @@ import { ProductContext } from './product-context';
       </div>
 
       @if (error()) {
-        <p class="error">{{ error() }}</p>
+        <p class="state error" role="alert">{{ error() }}</p>
       } @else if (tickets(); as tickets) {
         @if (tickets.length) {
-          <ul class="tickets">
+          <ul class="tickets" [attr.aria-busy]="loading()">
             @for (ticket of tickets; track ticket.number) {
-              <li class="card">
+              <li class="card ticket">
                 <div class="title">
                   <a [routerLink]="['/produits', product.slug, 'tickets', ticket.number]">{{ ticket.title }}</a>
                   <app-status-badge [status]="ticket.status" />
@@ -49,11 +49,16 @@ import { ProductContext } from './product-context';
               </li>
             }
           </ul>
+        } @else if (type() || statut()) {
+          <div class="state empty">
+            <p class="muted">Aucun ticket ne correspond à ces filtres.</p>
+            <a class="btn small" [routerLink]="[]">Voir tous les tickets</a>
+          </div>
         } @else {
-          <p class="muted">Aucun ticket.</p>
+          <p class="state muted">Aucun ticket pour le moment : soyez le premier à signaler un bug ou à proposer une idée.</p>
         }
       } @else {
-        <p class="muted">Chargement…</p>
+        <p class="state muted" role="status">Chargement des tickets…</p>
       }
     }
   `,
@@ -78,6 +83,32 @@ import { ProductContext } from './product-context';
       padding: 0;
       display: grid;
       gap: 0.5rem;
+      transition: opacity 0.2s;
+
+      &[aria-busy='true'] {
+        opacity: 0.55;
+      }
+    }
+    .ticket {
+      position: relative;
+
+      &:hover,
+      &:focus-within {
+        border-color: var(--accent);
+      }
+
+      a {
+        color: var(--text);
+        text-decoration: none;
+
+        /* The whole card opens the ticket */
+        &::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+        }
+      }
     }
     .title {
       display: flex;
@@ -106,6 +137,8 @@ export class TicketListPage {
   protected readonly statuses = TICKET_STATUSES;
   protected readonly tickets = signal<Ticket[] | null>(null);
   protected readonly error = signal<string | null>(null);
+  /** A filter changed: the previous list stays, dimmed, until the new one arrives */
+  protected readonly loading = signal(false);
 
   constructor() {
     effect(() => {
@@ -126,10 +159,13 @@ export class TicketListPage {
 
   private async load(slug: string, filter: { type?: TicketType; status?: TicketStatus }): Promise<void> {
     this.error.set(null);
+    this.loading.set(true);
     try {
       this.tickets.set(await this.productsService.tickets(slug, filter));
     } catch (e) {
       this.error.set(apiErrorMessage(e));
+    } finally {
+      this.loading.set(false);
     }
   }
 }

@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { CodeBlock } from '../../shared/code-block';
+import { Icon } from '../../shared/icon';
 import { AdminProductContext } from './admin-product-context';
 
 /**
@@ -9,7 +10,7 @@ import { AdminProductContext } from './admin-product-context';
  */
 @Component({
   selector: 'app-admin-integration-page',
-  imports: [CodeBlock],
+  imports: [CodeBlock, Icon],
   templateUrl: './admin-integration.page.html',
   styleUrl: './admin-integration.page.scss',
 })

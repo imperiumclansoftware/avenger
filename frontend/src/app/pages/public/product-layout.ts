@@ -1,6 +1,7 @@
 import { Component, effect, inject, input, untracked } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Icon } from '../../shared/icon';
 import { NeonWaves } from '../../shared/neon-decor';
 import { ProductIcon } from '../../shared/product-icon';
 import { ProductContext } from './product-context';
@@ -8,18 +9,17 @@ import { ProductContext } from './product-context';
 /** A product: its header and its tabs (presentation, wiki, tickets). */
 @Component({
   selector: 'app-product-layout',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, NeonWaves, ProductIcon],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, Icon, NeonWaves, ProductIcon],
   providers: [ProductContext],
   template: `
     @if (context.error(); as error) {
-      <div class="container state">
-        <p class="error">{{ error }}</p>
-        <a class="btn" routerLink="/">Retour aux projets</a>
+      <div class="container missing">
+        <p class="error" role="alert">{{ error }}</p>
+        <a class="btn" routerLink="/"><app-icon name="arrow-left" /> Retour aux projets</a>
       </div>
     } @else if (context.product(); as product) {
       <section class="hero">
         <div class="container">
-          <span class="eyebrow">Projet open source</span>
           <div class="title">
             <app-product-icon [product]="product" [size]="72" />
             <h1>{{ product.name }}</h1>
@@ -29,10 +29,12 @@ import { ProductContext } from './product-context';
           }
           <div class="actions">
             <a class="btn primary" [routerLink]="['/produits', product.slug, 'tickets', 'nouveau']">
-              Ouvrir un ticket <span class="arrow" aria-hidden="true">→</span>
+              Ouvrir un ticket <app-icon class="arrow" name="arrow-right" />
             </a>
             @if (product.repositoryUrl) {
-              <a class="btn" [href]="product.repositoryUrl" target="_blank" rel="noopener">Code source ↗</a>
+              <a class="btn" [href]="product.repositoryUrl" target="_blank" rel="noopener">
+                Code source <app-icon name="external" /><span class="visually-hidden"> (nouvel onglet)</span>
+              </a>
             }
           </div>
           <dl class="stats">
@@ -46,21 +48,28 @@ import { ProductContext } from './product-context';
       </section>
       <div class="container">
         <nav class="tabs-nav" aria-label="Sections du produit">
-          <a [routerLink]="['/produits', product.slug]" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Présentation</a>
-          <a [routerLink]="['/produits', product.slug, 'wiki']" routerLinkActive="active">Wiki</a>
-          <a [routerLink]="['/produits', product.slug, 'tickets']" routerLinkActive="active">
-            Tickets<span class="count">{{ openCount() }}</span>
+          <a [routerLink]="['/produits', product.slug]" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">Présentation</a>
+          <a [routerLink]="['/produits', product.slug, 'wiki']" routerLinkActive="active" ariaCurrentWhenActive="page">Wiki</a>
+          <a [routerLink]="['/produits', product.slug, 'tickets']" routerLinkActive="active" ariaCurrentWhenActive="page">
+            Tickets<span class="count">{{ openCount() }}<span class="visually-hidden"> à traiter</span></span>
           </a>
         </nav>
         <router-outlet />
       </div>
     } @else {
-      <p class="container muted state">Chargement…</p>
+      <p class="container missing muted" role="status">Chargement du projet…</p>
     }
   `,
   styles: `
-    .state {
+    .missing {
+      display: grid;
+      justify-items: start;
+      gap: 1rem;
       padding-top: 3rem;
+
+      p {
+        margin: 0;
+      }
     }
     .hero {
       position: relative;
@@ -78,13 +87,15 @@ import { ProductContext } from './product-context';
         display: flex;
         align-items: center;
         gap: 1.25rem;
-        margin: 1rem 0 0.5rem;
+        margin: 0 0 0.75rem;
       }
 
       h1 {
         margin: 0;
         font-size: clamp(2.25rem, 1.6rem + 3vw, 3.75rem);
         font-weight: 700;
+        letter-spacing: -0.02em;
+        overflow-wrap: anywhere;
       }
 
       .lead {
@@ -97,7 +108,7 @@ import { ProductContext } from './product-context';
     .stats {
       display: flex;
       flex-wrap: wrap;
-      gap: 2.5rem;
+      gap: 1.25rem 2.5rem;
       margin: 2.25rem 0 0;
 
       div {

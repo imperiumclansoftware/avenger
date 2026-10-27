@@ -35,12 +35,12 @@ import { AdminProductContext } from './admin-product-context';
       }
       @if (tickets(); as tickets) {
         @if (tickets.length) {
-          <ul class="tickets">
+          <ul class="tickets" [attr.aria-busy]="loading()">
             @for (ticket of tickets; track ticket.id) {
-              <li class="card">
+              <li class="card" [attr.aria-busy]="busyId() === ticket.id">
                 <details>
                   <summary>
-                    <span class="title">#{{ ticket.number }} {{ ticket.title }}</span>
+                    <span class="title"><span class="number">#{{ ticket.number }}</span> {{ ticket.title }}</span>
                     <span class="muted meta">
                       {{ ticket.authorName }} &lt;<a [href]="'mailto:' + ticket.authorEmail">{{ ticket.authorEmail }}</a>&gt; · {{ date(ticket.createdAt) }}
                     </span>
@@ -50,7 +50,7 @@ import { AdminProductContext } from './admin-product-context';
                 <div class="controls">
                   <label>
                     File
-                    <select (change)="change(ticket, { type: value($event) })">
+                    <select [disabled]="busyId() === ticket.id" (change)="change(ticket, { type: value($event) })">
                       @for (t of types; track t.value) {
                         <option [value]="t.value" [selected]="t.value === ticket.type">{{ t.label }}</option>
                       }
@@ -58,22 +58,27 @@ import { AdminProductContext } from './admin-product-context';
                   </label>
                   <label>
                     Statut
-                    <select (change)="change(ticket, { status: value($event) })">
+                    <select [disabled]="busyId() === ticket.id" (change)="change(ticket, { status: value($event) })">
                       @for (s of statuses; track s.value) {
                         <option [value]="s.value" [selected]="s.value === ticket.status">{{ s.label }}</option>
                       }
                     </select>
                   </label>
-                  <button class="btn small danger" type="button" (click)="remove(ticket)">Supprimer</button>
+                  <button class="btn small danger" type="button" [disabled]="busyId() === ticket.id" (click)="remove(ticket)">Supprimer</button>
                 </div>
               </li>
             }
           </ul>
+        } @else if (type() || statut()) {
+          <div class="state empty">
+            <p class="muted">Aucun ticket ne correspond à ces filtres.</p>
+            <a class="btn small" [routerLink]="[]">Voir tous les tickets</a>
+          </div>
         } @else {
-          <p class="muted">Aucun ticket.</p>
+          <p class="state muted">Aucun ticket pour ce produit.</p>
         }
       } @else if (!error()) {
-        <p class="muted">Chargement…</p>
+        <p class="state muted" role="status">Chargement des tickets…</p>
       }
     }
   `,
@@ -94,12 +99,22 @@ import { AdminProductContext } from './admin-product-context';
       padding: 0;
       display: grid;
       gap: 0.5rem;
+      transition: opacity 0.2s;
+
+      &[aria-busy='true'] {
+        opacity: 0.55;
+      }
     }
     li {
       display: flex;
       flex-wrap: wrap;
       gap: 0.75rem;
       justify-content: space-between;
+      transition: opacity 0.2s;
+
+      &[aria-busy='true'] {
+        opacity: 0.7;
+      }
     }
     details {
       flex: 1 1 24rem;
@@ -107,9 +122,18 @@ import { AdminProductContext } from './admin-product-context';
     }
     summary {
       cursor: pointer;
+
+      &:hover .title {
+        color: var(--link);
+      }
     }
     .title {
       font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+    .number {
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
     }
     .meta {
       display: block;
@@ -155,6 +179,10 @@ export class AdminTicketsPage {
   protected readonly statuses = TICKET_STATUSES;
   protected readonly tickets = signal<AdminTicket[] | null>(null);
   protected readonly error = signal<string | null>(null);
+  /** A filter changed: the previous list stays, dimmed, until the new one arrives */
+  protected readonly loading = signal(false);
+  /** The ticket being changed or deleted: its controls wait for the answer */
+  protected readonly busyId = signal<number | null>(null);
 
   constructor() {
     effect(() => {
@@ -175,6 +203,7 @@ export class AdminTicketsPage {
 
   protected async change(ticket: AdminTicket, change: { status?: TicketStatus; type?: TicketType }): Promise<void> {
     this.error.set(null);
+    this.busyId.set(ticket.id);
     try {
       const updated = await this.adminProducts.updateTicket(Number(this.id()), ticket.number, {
         status: change.status ?? ticket.status,
@@ -185,6 +214,8 @@ export class AdminTicketsPage {
       void this.context.reload();
     } catch (e) {
       this.error.set(apiErrorMessage(e));
+    } finally {
+      this.busyId.set(null);
     }
   }
 
@@ -192,12 +223,16 @@ export class AdminTicketsPage {
     if (!confirm(`Supprimer le ticket #${ticket.number} « ${ticket.title} » ?`)) {
       return;
     }
+    this.error.set(null);
+    this.busyId.set(ticket.id);
     try {
       await this.adminProducts.removeTicket(Number(this.id()), ticket.number);
       this.tickets.update((tickets) => tickets?.filter((t) => t.id !== ticket.id) ?? null);
       void this.context.reload();
     } catch (e) {
       this.error.set(apiErrorMessage(e));
+    } finally {
+      this.busyId.set(null);
     }
   }
 
@@ -207,10 +242,13 @@ export class AdminTicketsPage {
 
   private async load(productId: number, filter: { type?: TicketType; status?: TicketStatus }): Promise<void> {
     this.error.set(null);
+    this.loading.set(true);
     try {
       this.tickets.set(await this.adminProducts.tickets(productId, filter));
     } catch (e) {
       this.error.set(apiErrorMessage(e));
+    } finally {
+      this.loading.set(false);
     }
   }
 }

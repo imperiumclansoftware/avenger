@@ -1,12 +1,20 @@
 import { Component, input, signal } from '@angular/core';
+import { Icon } from './icon';
 
 /** Code to copy, with a "Copier" button. */
 @Component({
   selector: 'app-code-block',
+  imports: [Icon],
   template: `
     <div class="code">
       <pre><code>{{ code() }}</code></pre>
-      <button class="btn small" type="button" (click)="copy()">{{ copied() ? 'Copié ✓' : 'Copier' }}</button>
+      <button class="btn small" type="button" (click)="copy()" aria-live="polite">
+        @if (copied()) {
+          <app-icon name="check" /> Copié
+        } @else {
+          Copier
+        }
+      </button>
     </div>
   `,
   styles: `
@@ -29,6 +37,7 @@ import { Component, input, signal } from '@angular/core';
       position: absolute;
       top: 0.6rem;
       right: 0.6rem;
+      min-width: 5.25rem;
       background: var(--surface);
     }
   `,

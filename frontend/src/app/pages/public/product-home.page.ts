@@ -10,7 +10,7 @@ import { ProductContext } from './product-context';
       @if (product.homepage) {
         <article class="card"><app-markdown [content]="product.homepage" /></article>
       } @else {
-        <p class="muted">La présentation de ce projet n'a pas encore été rédigée.</p>
+        <p class="state muted">La présentation de ce projet n'a pas encore été rédigée.</p>
       }
     }
   `,

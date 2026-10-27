@@ -17,7 +17,9 @@ import { AuthService } from '../../core/auth/auth.service';
           <a routerLink="/admin/email" routerLinkActive="active" ariaCurrentWhenActive="page">E-mail</a>
         </nav>
         <a routerLink="/" class="site-link">Voir le site</a>
-        <a routerLink="/admin/compte" class="user" routerLinkActive="active" ariaCurrentWhenActive="page" title="Mon compte">{{ auth.user()?.email }}</a>
+        <a routerLink="/admin/compte" class="user" routerLinkActive="active" ariaCurrentWhenActive="page">
+          <span class="email">{{ auth.user()?.email }}</span><span class="short">Mon compte</span>
+        </a>
         <button class="btn small" type="button" (click)="auth.logout()">Déconnexion</button>
       </div>
     </header>
@@ -75,11 +77,13 @@ import { AuthService } from '../../core/auth/auth.service';
     }
     .admin-nav {
       display: flex;
+      flex-wrap: wrap;
       gap: 0.25rem;
 
       a {
         padding: 0.35rem 0.75rem;
         border-bottom: 2px solid transparent;
+        transition: color 0.2s;
 
         &.active {
           color: var(--text);
@@ -91,14 +95,28 @@ import { AuthService } from '../../core/auth/auth.service';
       margin-left: auto;
     }
     .user {
+      max-width: 16rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       font-size: 0.9rem;
 
       &.active {
         color: var(--text);
       }
 
-      @media (max-width: 36rem) {
+      .short {
         display: none;
+      }
+
+      @media (max-width: 36rem) {
+        .email {
+          display: none;
+        }
+
+        .short {
+          display: inline;
+        }
       }
     }
     main {

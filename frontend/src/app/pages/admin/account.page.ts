@@ -59,7 +59,7 @@ function samePassword(control: AbstractControl): ValidationErrors | null {
       @if (passwordChanged()) {
         <p class="success" role="status">Mot de passe changé.</p>
       }
-      <div class="actions"><button class="btn primary" type="submit" [disabled]="busy()">Changer le mot de passe</button></div>
+      <div class="actions"><button class="btn primary" type="submit" [disabled]="busy()">{{ busy() ? 'Changement…' : 'Changer le mot de passe' }}</button></div>
     </form>
   `,
   styles: `
@@ -79,9 +79,6 @@ function samePassword(control: AbstractControl): ValidationErrors | null {
       margin: 0.4rem 0 0;
       font-size: 0.85rem;
       color: var(--text-muted);
-    }
-    .success {
-      color: var(--success);
     }
   `,
 })

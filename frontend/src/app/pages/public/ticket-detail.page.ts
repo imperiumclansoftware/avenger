@@ -3,19 +3,20 @@ import { RouterLink } from '@angular/router';
 import { apiErrorMessage } from '../../core/api/api-error';
 import { Ticket } from '../../core/api/models';
 import { ProductsService } from '../../core/products/products.service';
+import { Icon } from '../../shared/icon';
 import { Markdown } from '../../shared/markdown';
 import { StatusBadge } from '../../shared/status-badge';
 
 @Component({
   selector: 'app-ticket-detail-page',
-  imports: [Markdown, RouterLink, StatusBadge],
+  imports: [Icon, Markdown, RouterLink, StatusBadge],
   template: `
-    <p><a [routerLink]="['/produits', slug(), 'tickets']">← Tous les tickets</a></p>
+    <p class="back"><a [routerLink]="['/produits', slug(), 'tickets']"><app-icon name="arrow-left" /> Tous les tickets</a></p>
     @if (error()) {
-      <p class="error">{{ error() }}</p>
+      <p class="state error" role="alert">{{ error() }}</p>
     } @else if (ticket(); as ticket) {
       <article class="card">
-        <h2>{{ ticket.title }} <span class="muted">#{{ ticket.number }}</span></h2>
+        <h2>{{ ticket.title }} <span class="muted number">#{{ ticket.number }}</span></h2>
         <p class="meta">
           <app-status-badge [status]="ticket.status" />
           <span class="muted">{{ ticket.queueName }} · ouvert par {{ ticket.authorName }} le {{ date(ticket.createdAt) }}</span>
@@ -23,12 +24,17 @@ import { StatusBadge } from '../../shared/status-badge';
         <app-markdown [content]="ticket.description" />
       </article>
     } @else {
-      <p class="muted">Chargement…</p>
+      <p class="state muted" role="status">Chargement du ticket…</p>
     }
   `,
   styles: `
     h2 {
       margin-top: 0;
+      overflow-wrap: anywhere;
+    }
+    .number {
+      font-weight: 400;
+      font-variant-numeric: tabular-nums;
     }
     .meta {
       display: flex;

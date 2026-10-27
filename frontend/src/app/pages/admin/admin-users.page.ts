@@ -39,7 +39,7 @@ import { FormErrors } from '../../shared/form-errors';
         </table>
       </div>
     } @else if (!error()) {
-      <p class="muted">Chargement…</p>
+      <p class="state muted" role="status">Chargement des administrateurs…</p>
     }
 
     <form class="card form add" [formGroup]="form" (ngSubmit)="add()" novalidate aria-labelledby="add-title">
@@ -65,9 +65,9 @@ import { FormErrors } from '../../shared/form-errors';
         <p class="error" role="alert">{{ error }}</p>
       }
       @if (added()) {
-        <p class="saved" role="status">{{ added() }} peut maintenant se connecter.</p>
+        <p class="success" role="status">{{ added() }} peut maintenant se connecter.</p>
       }
-      <div class="actions"><button class="btn primary" type="submit" [disabled]="busy()">Ajouter</button></div>
+      <div class="actions"><button class="btn primary" type="submit" [disabled]="busy()">{{ busy() ? 'Ajout…' : 'Ajouter' }}</button></div>
     </form>
   `,
   styles: `
@@ -91,17 +91,6 @@ import { FormErrors } from '../../shared/form-errors';
       gap: 1rem;
       align-items: start;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-    }
-    .saved {
-      color: var(--success);
-    }
-    .visually-hidden {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-      white-space: nowrap;
     }
   `,
 })

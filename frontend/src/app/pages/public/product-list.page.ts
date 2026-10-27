@@ -3,25 +3,25 @@ import { RouterLink } from '@angular/router';
 import { apiErrorMessage } from '../../core/api/api-error';
 import { ProductCard } from '../../core/api/models';
 import { ProductsService } from '../../core/products/products.service';
+import { Icon } from '../../shared/icon';
 import { ChevronMark, NeonCode, NeonWaves } from '../../shared/neon-decor';
 import { ProductIcon } from '../../shared/product-icon';
 
 /** Home page of the public area: what the site offers, then the published projects. */
 @Component({
   selector: 'app-product-list-page',
-  imports: [RouterLink, ChevronMark, NeonCode, NeonWaves, ProductIcon],
+  imports: [RouterLink, ChevronMark, Icon, NeonCode, NeonWaves, ProductIcon],
   template: `
     <section class="hero">
       <div class="container hero-grid">
         <div>
-          <span class="eyebrow">Open source</span>
           <h1>Des projets libres, <span class="accent">documentés</span> et à l'écoute</h1>
           <p class="lead">
             Découvrez nos logiciels libres, apprenez à les utiliser grâce à leur wiki et faites-nous part
             de vos bugs, de vos retours et de vos idées.
           </p>
           <div class="actions">
-            <a class="btn primary" routerLink="/" fragment="projets">Voir les projets <span class="arrow" aria-hidden="true">→</span></a>
+            <a class="btn primary" routerLink="/" fragment="projets">Voir les projets <app-icon class="arrow" name="arrow-right" /></a>
           </div>
           @if (products(); as products) {
             <dl class="stats">
@@ -50,11 +50,10 @@ import { ProductIcon } from '../../shared/product-icon';
 
     <section class="container projects" id="projets" aria-labelledby="projets-title">
       <div class="section-head">
-        <span class="eyebrow">Nos projets</span>
         <h2 id="projets-title">Choisissez un projet</h2>
       </div>
       @if (error()) {
-        <p class="error">{{ error() }}</p>
+        <p class="state error" role="alert">{{ error() }}</p>
       } @else if (products(); as products) {
         @if (products.length) {
           <ul class="grid">
@@ -73,17 +72,19 @@ import { ProductIcon } from '../../shared/product-icon';
                   <a [routerLink]="['/produits', product.slug, 'wiki']">Wiki</a>
                   <a [routerLink]="['/produits', product.slug, 'tickets']">Tickets</a>
                   @if (product.repositoryUrl) {
-                    <a [href]="product.repositoryUrl" target="_blank" rel="noopener">Code source ↗</a>
+                    <a [href]="product.repositoryUrl" target="_blank" rel="noopener">
+                      Code source <app-icon name="external" /><span class="visually-hidden"> (nouvel onglet)</span>
+                    </a>
                   }
                 </p>
               </li>
             }
           </ul>
         } @else {
-          <p class="muted">Aucun projet publié pour le moment.</p>
+          <p class="state muted">Aucun projet publié pour le moment.</p>
         }
       } @else {
-        <p class="muted">Chargement…</p>
+        <p class="state muted" role="status">Chargement des projets…</p>
       }
     </section>
   `,

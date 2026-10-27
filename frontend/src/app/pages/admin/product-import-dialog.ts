@@ -63,7 +63,7 @@ const MAX_SIZE = 32 * 1024 * 1024;
         </div>
       }
       <div class="actions">
-        <button class="btn primary" type="button" [disabled]="!summary() || busy()" (click)="import()">Importer</button>
+        <button class="btn primary" type="button" [disabled]="!summary() || busy()" (click)="import()">{{ busy() ? 'Import…' : 'Importer' }}</button>
         <button class="btn" type="button" (click)="modal().close()">Annuler</button>
       </div>
     </dialog>

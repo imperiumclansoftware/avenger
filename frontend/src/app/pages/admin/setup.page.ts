@@ -1,9 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, effect, inject, signal, viewChild } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { CodeBlock } from '../../shared/code-block';
 import { FormErrors } from '../../shared/form-errors';
+import { Icon } from '../../shared/icon';
 
 /** The confirmation must repeat the password */
 function samePassword(control: AbstractControl): ValidationErrors | null {
@@ -16,12 +18,15 @@ function samePassword(control: AbstractControl): ValidationErrors | null {
  */
 @Component({
   selector: 'app-setup-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CodeBlock, Icon],
   template: `
     <main class="setup">
       <p class="brand">Avenger</p>
       <div class="card">
-        <p class="eyebrow">Installation · étape {{ step() }} sur 2</p>
+        <ol class="steps" aria-label="Installation">
+          <li [attr.aria-current]="step() === 1 ? 'step' : null" [class.done]="step() === 2">Code d'installation</li>
+          <li [attr.aria-current]="step() === 2 ? 'step' : null">Premier administrateur</li>
+        </ol>
 
         @if (step() === 1) {
           <form class="form" [formGroup]="codeForm" (ngSubmit)="verify()" novalidate>
@@ -30,7 +35,7 @@ function samePassword(control: AbstractControl): ValidationErrors | null {
               Pour que seul l'administrateur du serveur puisse installer Avenger, saisissez le
               <strong>code d'installation</strong>. Il s'affiche dans les journaux du serveur :
             </p>
-            <pre>docker compose logs avenger</pre>
+            <app-code-block code="docker compose logs avenger" />
             <p class="muted small">ou : <code>php bin/console app:setup:code</code></p>
             <div class="field">
               <label for="code">Code d'installation</label>
@@ -42,15 +47,17 @@ function samePassword(control: AbstractControl): ValidationErrors | null {
             @if (codeErrors.general(); as error) {
               <p class="error" role="alert">{{ error }}</p>
             }
-            <button class="btn primary" type="submit" [disabled]="busy()">Continuer <span class="arrow" aria-hidden="true">→</span></button>
+            <button class="btn primary" type="submit" [disabled]="busy()">
+              {{ busy() ? 'Vérification…' : 'Continuer' }} <app-icon class="arrow" name="arrow-right" />
+            </button>
           </form>
         } @else {
           <form class="form" [formGroup]="accountForm" (ngSubmit)="install()" novalidate>
             <h1>Le premier administrateur</h1>
-            <p class="muted">Ce compte gère les produits, leur wiki et leurs tickets. D'autres comptes se créent ensuite en ligne de commande.</p>
+            <p class="muted">Ce compte gère les produits, leur wiki et leurs tickets. Vous pourrez ajouter d'autres administrateurs depuis la page <em>Utilisateurs</em>.</p>
             <div class="field">
               <label for="email">E-mail</label>
-              <input id="email" type="email" formControlName="email" autocomplete="username" maxlength="180" [attr.aria-invalid]="!!accountErrors.of('email')" aria-describedby="email-error" />
+              <input id="email" type="email" formControlName="email" autocomplete="username" maxlength="180" [attr.aria-invalid]="!!accountErrors.of('email')" aria-describedby="email-error" #accountEmail />
               @if (accountErrors.of('email'); as error) {
                 <span class="field-error" id="email-error">{{ error }}</span>
               }
@@ -74,8 +81,8 @@ function samePassword(control: AbstractControl): ValidationErrors | null {
               <p class="error" role="alert">{{ error }}</p>
             }
             <div class="actions">
-              <button class="btn primary" type="submit" [disabled]="busy()">Installer Avenger</button>
-              <button class="btn" type="button" (click)="step.set(1)">Retour</button>
+              <button class="btn primary" type="submit" [disabled]="busy()">{{ busy() ? 'Installation…' : 'Installer Avenger' }}</button>
+              <button class="btn" type="button" [disabled]="busy()" (click)="step.set(1)">Retour</button>
             </div>
           </form>
         }
@@ -107,8 +114,36 @@ function samePassword(control: AbstractControl): ValidationErrors | null {
     .card {
       padding: 1.75rem;
     }
-    .eyebrow {
-      margin: 0 0 1rem;
+    .steps {
+      display: flex;
+      gap: 0.4rem;
+      margin: 0 0 1.5rem;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+
+      li {
+        flex: 1;
+        padding-top: 0.5rem;
+        border-top: 2px solid var(--border);
+        counter-increment: step;
+
+        &::before {
+          content: counter(step) '. ';
+        }
+      }
+
+      [aria-current],
+      .done {
+        border-top-color: var(--accent-bright);
+      }
+
+      [aria-current] {
+        color: var(--text);
+        font-weight: 600;
+      }
     }
     h1 {
       margin: 0;
@@ -116,16 +151,6 @@ function samePassword(control: AbstractControl): ValidationErrors | null {
     }
     p {
       margin: 0;
-    }
-    pre {
-      margin: 0;
-      padding: 0.6rem 0.8rem;
-      overflow-x: auto;
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      background: var(--bg-band);
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
     }
     code {
       font-family: var(--font-mono);
@@ -164,7 +189,11 @@ export class SetupPage {
     confirm: { required: 'Confirmez le mot de passe.', mismatch: 'Les deux mots de passe ne correspondent pas.' },
   });
 
+  /** The first field of step 2, focused when the step appears */
+  private readonly accountEmail = viewChild<ElementRef<HTMLInputElement>>('accountEmail');
+
   constructor() {
+    effect(() => this.accountEmail()?.nativeElement.focus());
     // Typed again after the confirmation: check it again
     this.accountForm.controls.password.valueChanges.subscribe(() =>
       this.accountForm.controls.confirm.updateValueAndValidity({ emitEvent: false }),

@@ -5,6 +5,7 @@ import { apiErrorMessage } from '../../core/api/api-error';
 import { WikiPage, WikiPagePayload } from '../../core/api/models';
 import { AdminProductsService } from '../../core/products/admin-products.service';
 import { FormErrors } from '../../shared/form-errors';
+import { Icon } from '../../shared/icon';
 import { MarkdownEditor } from '../../shared/markdown-editor';
 import { AdminProductContext } from './admin-product-context';
 
@@ -13,7 +14,7 @@ const NEW_PAGE = 'nouvelle';
 /** The wiki of a product: list of pages and editor of the selected one (the home page by default). */
 @Component({
   selector: 'app-admin-wiki-page',
-  imports: [ReactiveFormsModule, RouterLink, RouterLinkActive, MarkdownEditor],
+  imports: [ReactiveFormsModule, RouterLink, RouterLinkActive, Icon, MarkdownEditor],
   template: `
     @if (context.product(); as product) {
       <div class="wiki">
@@ -21,14 +22,14 @@ const NEW_PAGE = 'nouvelle';
           <ul>
             @for (p of product.wikiPages; track p.id) {
               <li>
-                <a [routerLink]="[base(), p.id]" [class.active]="p.id === editedId()">{{ p.title }}</a>
+                <a [routerLink]="[base(), p.id]" [class.active]="p.id === editedId()" [attr.aria-current]="p.id === editedId() ? 'page' : null">{{ p.title }}</a>
               </li>
             }
           </ul>
-          <a class="btn small" [routerLink]="[base(), newPage]" routerLinkActive="active">+ Nouvelle page</a>
+          <a class="btn small" [routerLink]="[base(), newPage]" routerLinkActive="active" ariaCurrentWhenActive="page">Nouvelle page</a>
         </nav>
 
-        <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate [attr.aria-busy]="pageLoading()">
           <h2>{{ isNew() ? 'Nouvelle page' : 'Modifier la page' }}</h2>
           <div class="field">
             <label for="title">Titre</label>
@@ -56,15 +57,21 @@ const NEW_PAGE = 'nouvelle';
             <p class="error" role="alert">{{ message }}</p>
           }
           @if (saved()) {
-            <p class="saved" role="status">Enregistré.</p>
+            <p class="success" role="status">Enregistré.</p>
           }
           <div class="actions">
-            <button class="btn primary" type="submit" [disabled]="saving()">
-              {{ isNew() ? 'Créer la page' : 'Enregistrer' }}
+            <button class="btn primary" type="submit" [disabled]="saving() || pageLoading()">
+              @if (saving()) {
+                {{ isNew() ? 'Création…' : 'Enregistrement…' }}
+              } @else {
+                {{ isNew() ? 'Créer la page' : 'Enregistrer' }}
+              }
             </button>
             @if (page(); as page) {
               @if (product.published) {
-                <a class="btn" [routerLink]="['/produits', product.slug, 'wiki', page.slug]" target="_blank">Voir</a>
+                <a class="btn" [routerLink]="['/produits', product.slug, 'wiki', page.slug]" target="_blank">
+                  Voir la page <app-icon name="external" /><span class="visually-hidden"> (nouvel onglet)</span>
+                </a>
               }
               @if (!page.home) {
                 <button class="btn danger" type="button" [disabled]="saving()" (click)="remove(page)">Supprimer</button>
@@ -95,10 +102,16 @@ const NEW_PAGE = 'nouvelle';
       display: block;
       padding: 0.35rem 0.6rem;
       border-radius: var(--radius);
-      color: var(--text);
+      color: var(--text-muted);
       text-decoration: none;
 
+      &:hover {
+        color: var(--text);
+        background: var(--surface);
+      }
+
       &.active {
+        color: var(--text);
         background: var(--surface-alt);
         font-weight: 600;
       }
@@ -108,9 +121,11 @@ const NEW_PAGE = 'nouvelle';
     }
     .form {
       max-width: none;
-    }
-    .saved {
-      color: var(--success);
+      transition: opacity 0.2s;
+
+      &[aria-busy='true'] {
+        opacity: 0.55;
+      }
     }
   `,
 })
@@ -138,6 +153,8 @@ export class AdminWikiPage {
   protected readonly saving = signal(false);
   protected readonly saved = signal(false);
   protected readonly error = signal<string | null>(null);
+  /** The page is being fetched: nothing to save yet */
+  protected readonly pageLoading = signal(false);
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(160)]],
@@ -210,10 +227,13 @@ export class AdminWikiPage {
     if (pageId === null) {
       return;
     }
+    this.pageLoading.set(true);
     try {
       this.fill(await this.adminProducts.wikiPage(productId, pageId));
     } catch (e) {
       this.error.set(apiErrorMessage(e, 'Page introuvable.'));
+    } finally {
+      this.pageLoading.set(false);
     }
   }
 

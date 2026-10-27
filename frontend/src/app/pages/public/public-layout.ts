@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-public-layout',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, Icon],
   template: `
     <div class="topbar">
       <div class="container bar">
@@ -21,11 +22,11 @@ import { AuthService } from '../../core/auth/auth.service';
           Avenger
         </a>
         <ul class="links">
-          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a></li>
+          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">Accueil</a></li>
           <li><a routerLink="/" fragment="projets">Projets</a></li>
         </ul>
         <a class="btn primary cta" routerLink="/admin">
-          {{ auth.token() ? 'Administration' : 'Connexion' }} <span class="arrow" aria-hidden="true">→</span>
+          {{ auth.token() ? 'Administration' : 'Connexion' }} <app-icon class="arrow" name="arrow-right" />
         </a>
       </nav>
     </header>
@@ -127,6 +128,7 @@ import { AuthService } from '../../core/auth/auth.service';
         color: var(--text-muted);
         text-decoration: none;
         border-bottom: 2px solid transparent;
+        transition: color 0.2s;
 
         &:hover {
           color: var(--text);

@@ -2,12 +2,13 @@ import { Component, input, inject, signal, viewChild } from '@angular/core';
 import { apiErrorMessage } from '../../core/api/api-error';
 import { Product } from '../../core/api/models';
 import { AdminProductsService } from '../../core/products/admin-products.service';
+import { Icon } from '../../shared/icon';
 import { Modal } from '../../shared/modal';
 
 /** Downloads the product in one file, to import it into another Avenger. */
 @Component({
   selector: 'app-product-export-dialog',
-  imports: [Modal],
+  imports: [Icon, Modal],
   template: `
     <dialog appModal aria-labelledby="export-title">
       <h2 id="export-title">Exporter « {{ product().name }} »</h2>
@@ -21,7 +22,8 @@ import { Modal } from '../../shared/modal';
       </label>
       @if (withTickets()) {
         <p class="note" role="note">
-          ⚠ Les tickets contiennent les noms et e-mails de leurs auteurs : conservez et transmettez ce fichier
+          <app-icon name="alert" />
+          Les tickets contiennent les noms et e-mails de leurs auteurs : conservez et transmettez ce fichier
           comme une donnée personnelle.
         </p>
       }
@@ -29,18 +31,16 @@ import { Modal } from '../../shared/modal';
         <p class="error" role="alert">{{ error() }}</p>
       }
       <div class="actions">
-        <button class="btn primary" type="button" autofocus [disabled]="busy()" (click)="download()">Télécharger</button>
+        <button class="btn primary" type="button" autofocus [disabled]="busy()" (click)="download()">
+          {{ busy() ? 'Préparation…' : 'Télécharger' }}
+        </button>
         <button class="btn" type="button" (click)="modal().close()">Annuler</button>
       </div>
     </dialog>
   `,
   styles: `
     .note {
-      padding: 0.6rem 0.8rem;
-      border: 1px solid var(--warning);
-      border-radius: 0.5rem;
-      color: var(--warning);
-      font-size: 0.9rem;
+      margin-top: 1rem;
     }
     .actions {
       margin-top: 1.25rem;

@@ -5,6 +5,7 @@ import { apiErrorMessage } from '../../core/api/api-error';
 import { Product, ProductPayload } from '../../core/api/models';
 import { AdminProductsService } from '../../core/products/admin-products.service';
 import { FormErrors } from '../../shared/form-errors';
+import { Icon } from '../../shared/icon';
 import { MarkdownEditor } from '../../shared/markdown-editor';
 import { ProductIcon } from '../../shared/product-icon';
 import { AdminProductContext } from './admin-product-context';
@@ -21,10 +22,10 @@ const ICON_MAX_SIZE = 1024 * 1024;
  */
 @Component({
   selector: 'app-product-form-page',
-  imports: [ReactiveFormsModule, RouterLink, MarkdownEditor, ProductIcon],
+  imports: [ReactiveFormsModule, RouterLink, Icon, MarkdownEditor, ProductIcon],
   template: `
     @if (!context) {
-      <p><a routerLink="/admin">← Produits</a></p>
+      <p class="back"><a routerLink="/admin"><app-icon name="arrow-left" /> Produits</a></p>
       <h1>Nouveau produit</h1>
       <p class="muted">Un wiki (avec sa page d'accueil) et trois files de tickets — bugs, retours utilisateurs et demandes de fonctionnalités — sont créés avec le produit.</p>
     }
@@ -54,11 +55,11 @@ const ICON_MAX_SIZE = 1024 * 1024;
       </div>
       <div class="field">
         <label for="slug">Adresse</label>
-        <input id="slug" type="text" formControlName="slug" maxlength="120" placeholder="générée à partir du nom" [attr.aria-invalid]="!!errors.of('slug')" aria-describedby="slug-error" />
+        <input id="slug" type="text" formControlName="slug" maxlength="120" placeholder="générée à partir du nom" [attr.aria-invalid]="!!errors.of('slug')" aria-describedby="slug-error slug-hint" />
         @if (errors.of('slug'); as error) {
           <span class="field-error" id="slug-error">{{ error }}</span>
         }
-        <span class="hint">/produits/{{ form.controls.slug.value || 'nom-du-produit' }} — minuscules, chiffres et tirets.</span>
+        <span class="hint" id="slug-hint">/produits/{{ form.controls.slug.value || 'nom-du-produit' }} — minuscules, chiffres et tirets.</span>
       </div>
       <div class="field">
         <label for="tagline">Accroche</label>
@@ -76,9 +77,9 @@ const ICON_MAX_SIZE = 1024 * 1024;
       </div>
       <div class="field">
         <label for="homepage">Page d'accueil</label>
-        <app-markdown-editor inputId="homepage" formControlName="homepage" [rows]="18" />
+        <app-markdown-editor inputId="homepage" formControlName="homepage" [rows]="18" describedBy="homepage-error" [invalid]="!!errors.of('homepage')" />
         @if (errors.of('homepage'); as error) {
-          <span class="field-error">{{ error }}</span>
+          <span class="field-error" id="homepage-error">{{ error }}</span>
         }
       </div>
       <label class="checkbox">
@@ -90,18 +91,22 @@ const ICON_MAX_SIZE = 1024 * 1024;
         <p class="error" role="alert">{{ error }}</p>
       }
       @if (saved()) {
-        <p class="saved" role="status">Enregistré.</p>
+        <p class="success" role="status">Enregistré.</p>
       }
       <div class="actions">
         <button class="btn primary" type="submit" [disabled]="saving()">
-          {{ context ? 'Enregistrer' : 'Créer le produit' }}
+          @if (saving()) {
+            {{ context ? 'Enregistrement…' : 'Création…' }}
+          } @else {
+            {{ context ? 'Enregistrer' : 'Créer le produit' }}
+          }
         </button>
       </div>
     </form>
   `,
   styles: `
-    .saved {
-      color: var(--success);
+    h1 {
+      margin: 0 0 0.5rem;
     }
     .icon-row {
       display: flex;

@@ -10,21 +10,17 @@ import { Markdown } from './markdown';
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => MarkdownEditor), multi: true },
   ],
   template: `
-    <div class="tabs" role="tablist">
-      <button type="button" role="tab" [attr.aria-selected]="!preview()" (click)="preview.set(false)">
-        Écrire
-      </button>
-      <button type="button" role="tab" [attr.aria-selected]="preview()" (click)="preview.set(true)">
-        Aperçu
-      </button>
-      <span class="hint">Markdown</span>
+    <div class="tabs" role="group" aria-label="Affichage">
+      <button type="button" [attr.aria-pressed]="!preview()" (click)="preview.set(false)">Écrire</button>
+      <button type="button" [attr.aria-pressed]="preview()" (click)="preview.set(true)">Aperçu</button>
+      <span class="hint">Mise en forme Markdown</span>
     </div>
     @if (preview()) {
       <div class="preview">
         @if (value()) {
           <app-markdown [content]="value()" />
         } @else {
-          <p class="muted">Rien à afficher.</p>
+          <p class="muted">Rien à afficher pour l'instant.</p>
         }
       </div>
     } @else {
@@ -33,6 +29,8 @@ import { Markdown } from './markdown';
         [rows]="rows()"
         [value]="value()"
         [disabled]="disabled()"
+        [attr.aria-describedby]="describedBy() || null"
+        [attr.aria-invalid]="invalid() || null"
         (input)="onInput($event)"
         (blur)="onTouched()"
       ></textarea>
@@ -43,6 +41,9 @@ import { Markdown } from './markdown';
 export class MarkdownEditor implements ControlValueAccessor {
   readonly inputId = input<string>();
   readonly rows = input(14);
+  /** Ids of the hint and error of the field, for screen readers */
+  readonly describedBy = input<string>();
+  readonly invalid = input(false);
 
   protected readonly value = signal('');
   protected readonly disabled = signal(false);

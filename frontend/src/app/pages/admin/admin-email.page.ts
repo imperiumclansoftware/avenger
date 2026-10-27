@@ -34,13 +34,13 @@ import { AdminMail } from './admin-mail';
           </span>
         </div>
         @if (generalSaved()) {
-          <p class="saved" role="status">Adresse enregistrée.</p>
+          <p class="success" role="status">Adresse enregistrée.</p>
         }
-        <div class="actions"><button class="btn primary" type="submit" [disabled]="busy()">Enregistrer</button></div>
+        <div class="actions"><button class="btn primary" type="submit" [disabled]="busy()">{{ busy() ? 'Enregistrement…' : 'Enregistrer' }}</button></div>
       </form>
       <app-admin-mail [mail]="s.mail" (saved)="settings.set($event)" />
     } @else {
-      <p class="muted">Chargement…</p>
+      <p class="state muted" role="status">Chargement des réglages…</p>
     }
   `,
   styles: `
@@ -57,9 +57,6 @@ import { AdminMail } from './admin-mail';
       p {
         margin: 0;
       }
-    }
-    .saved {
-      color: var(--success);
     }
   `,
 })
