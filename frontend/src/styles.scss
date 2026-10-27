@@ -383,7 +383,15 @@ input[type='radio'] {
 /* Rendered Markdown */
 .markdown {
   overflow-wrap: break-word;
-  max-width: 80ch;
+
+  /* Readable lines for the text; images (diagrams), tables and code use the whole width */
+  > :is(p, ul, ol, blockquote, h1, h2, h3, h4, h5, h6, hr) {
+    max-width: 80ch;
+  }
+
+  > p:has(> img:only-child) {
+    max-width: none;
+  }
 
   > :first-child {
     margin-top: 0;
