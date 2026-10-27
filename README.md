@@ -28,6 +28,19 @@ de tickets (bugs, retours utilisateurs, demandes de fonctionnalités).
   - Tickets : changer le statut (nouveau, accepté, en cours, résolu, refusé, fermé), déplacer un
     ticket dans une autre file, supprimer un ticket.
 
+- **Administration du serveur** :
+  - *Utilisateurs* : liste des administrateurs, ajout (e-mail et mot de passe), retrait ; on ne peut pas
+    retirer son propre compte, et Avenger garde toujours au moins un administrateur ;
+  - *E-mail* : adresse publique d'Avenger (liens des e-mails) et service de mail (serveur SMTP champ par
+    champ avec réglages tout prêts, sendmail, DSN avancé ou désactivé), test qui vérifie connexion,
+    authentification et envoi. Le mot de passe est chiffré en base (clé dérivée d'`APP_SECRET`) et jamais
+    renvoyé au navigateur. `MAILER_DSN`, `MAILER_FROM`, `MAILER_FROM_NAME` et `APP_PUBLIC_URL` restent
+    possibles en repli ;
+  - *Mon compte* : mot de passe, et e-mail à chaque nouveau ticket (activé par défaut).
+- **Notifications des tickets**, envoyées après la réponse (un serveur de mail absent ou en panne ne
+  bloque jamais l'ouverture d'un ticket) : aux administrateurs à chaque nouveau ticket (« Répondre » écrit à
+  l'auteur), à l'auteur un accusé de réception avec le lien pour suivre son ticket, puis à chaque
+  changement de statut.
 - **Import / export d'un produit**, pour le passer d'un Avenger à un autre : *Exporter* sur la page d'un
   produit télécharge un fichier JSON (page d'accueil, icône, wiki et, si on coche la case, les tickets avec
   leurs numéros, statuts, dates et auteurs) ; *Produits › Importer un produit* le recrée **en brouillon**,

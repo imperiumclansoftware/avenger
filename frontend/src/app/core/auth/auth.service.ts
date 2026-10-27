@@ -72,7 +72,15 @@ export class AuthService {
     }
   }
 
-  logout(): void {
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    this._user.set(await firstValueFrom(this.http.put<Me>('api/me/password', { currentPassword, newPassword })));
+  }
+
+  async saveNotifications(notifyNewTickets: boolean): Promise<void> {
+    this._user.set(await firstValueFrom(this.http.put<Me>('api/me/notifications', { notifyNewTickets })));
+  }
+
+    logout(): void {
     this.clear();
     void this.router.navigate(['/admin/connexion']);
   }

@@ -1,0 +1,9 @@
+{% extends 'emails/base.html.twig' %}
+{% block content %}
+  <p>Votre ticket est maintenant <strong>{{ status }}</strong> :</p>
+  {% include 'emails/_ticket.html.twig' %}
+  {% if link %}{% include 'emails/_button.html.twig' with { link: link, label: 'Voir le ticket' } %}{% endif %}
+{% endblock %}
+{% block footer %}
+  Vous recevez cet e-mail parce que vous avez ouvert ce ticket sur {{ product.name }}.
+{% endblock %}

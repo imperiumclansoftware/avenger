@@ -5,6 +5,65 @@ export interface Me {
   id: number;
   email: string;
   admin: boolean;
+  /** An e-mail for each new ticket */
+  notifyNewTickets: boolean;
+  /** Null for the accounts created before it was recorded */
+  createdAt: string | null;
+}
+
+export interface SettingValue {
+  value: string | null;
+  source: 'admin' | 'env' | null;
+}
+
+export type MailMode = 'smtp' | 'sendmail' | 'disabled' | 'custom';
+export type MailSecurity = 'starttls' | 'tls' | 'none';
+
+export interface MailServer {
+  mode: MailMode;
+  host: string | null;
+  port: number | null;
+  security: MailSecurity;
+  username: string | null;
+  passwordSet: boolean;
+  verifyPeer: boolean;
+  /** Only a hint of a custom DSN, which may contain secrets */
+  customDsn: { set: boolean; hint: string } | null;
+}
+
+export interface MailSettings {
+  configured: boolean;
+  /** Where the server comes from */
+  source: 'admin' | 'env' | null;
+  /** MAILER_DSN is set in the environment: the administration can go back to it */
+  envServer: boolean;
+  server: MailServer;
+  from: SettingValue;
+  fromName: SettingValue;
+}
+
+/** Mail service as edited in the administration; null secrets keep the saved ones. */
+export interface MailSettingsInput {
+  mode: MailMode;
+  host: string | null;
+  port: number | null;
+  security: MailSecurity;
+  username: string | null;
+  password: string | null;
+  verifyPeer: boolean;
+  dsn: string | null;
+  from: string | null;
+  fromName: string | null;
+}
+
+export interface AdminSettings {
+  general: { appUrl: SettingValue };
+  mail: MailSettings;
+}
+
+export interface CheckResult {
+  ok: boolean;
+  checks: { label: string; ok: boolean; detail: string | null }[];
 }
 
 export interface AuthResponse {

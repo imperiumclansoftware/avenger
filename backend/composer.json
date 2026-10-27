@@ -19,6 +19,7 @@
         "symfony/flex": "^2",
         "symfony/framework-bundle": "8.1.*",
         "symfony/lock": "8.1.*",
+        "symfony/mailer": "8.1.*",
         "symfony/mime": "8.1.*",
         "symfony/property-access": "8.1.*",
         "symfony/property-info": "8.1.*",
@@ -28,8 +29,11 @@
         "symfony/serializer": "8.1.*",
         "symfony/string": "8.1.*",
         "symfony/translation": "8.1.*",
+        "symfony/twig-bundle": "8.1.*",
         "symfony/validator": "8.1.*",
-        "symfony/yaml": "8.1.*"
+        "symfony/yaml": "8.1.*",
+        "twig/extra-bundle": "^3.29",
+        "twig/string-extra": "^3.24"
     },
     "config": {
         "allow-plugins": {

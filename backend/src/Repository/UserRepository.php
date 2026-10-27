@@ -24,6 +24,18 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $this->findOneBy(['email' => mb_strtolower($email)]);
     }
 
+    /** @return list<User> the administrators who want an e-mail for each new ticket */
+    public function findNotifiedOfNewTickets(): array
+    {
+        return array_values(array_filter($this->findAll(), static fn (User $user) => $user->isAdmin() && $user->notifiesNewTickets()));
+    }
+
+    /** @return list<User> by e-mail */
+    public function findAdministrators(): array
+    {
+        return array_values(array_filter($this->findBy([], ['email' => 'ASC']), static fn (User $user) => $user->isAdmin()));
+    }
+
     /** Avenger is installed once an account exists (the first administrator). */
     public function hasAccounts(): bool
     {

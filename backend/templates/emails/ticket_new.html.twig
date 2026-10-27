@@ -1,0 +1,10 @@
+{% extends 'emails/base.html.twig' %}
+{% block content %}
+  <p>Un nouveau ticket a été ouvert par <strong>{{ ticket.authorName }}</strong> ({{ ticket.authorEmail }}) :</p>
+  {% include 'emails/_ticket.html.twig' with { showDescription: true } %}
+  <p style="font-size:14px;color:#5e6577;">Répondez à cet e-mail pour écrire directement à {{ ticket.authorName }}.</p>
+  {% if adminLink %}{% include 'emails/_button.html.twig' with { link: adminLink, label: 'Gérer les tickets' } %}{% endif %}
+{% endblock %}
+{% block footer %}
+  Vous recevez cet e-mail en tant qu'administrateur d'Avenger.{% if accountLink %} Pour ne plus le recevoir : <a href="{{ accountLink }}" style="color:#1f62f0;">Mon compte</a>.{% endif %}
+{% endblock %}

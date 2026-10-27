@@ -77,6 +77,21 @@ export const routes: Routes = [
           import('./pages/admin/admin-products.page').then((m) => m.AdminProductsPage),
       },
       {
+        path: 'utilisateurs',
+        title: 'Utilisateurs — Administration',
+        loadComponent: () => import('./pages/admin/admin-users.page').then((m) => m.AdminUsersPage),
+      },
+      {
+        path: 'email',
+        title: 'E-mail — Administration',
+        loadComponent: () => import('./pages/admin/admin-email.page').then((m) => m.AdminEmailPage),
+      },
+      {
+        path: 'compte',
+        title: 'Mon compte — Administration',
+        loadComponent: () => import('./pages/admin/account.page').then((m) => m.AccountPage),
+      },
+      {
         path: 'produits/nouveau',
         title: 'Nouveau produit — Administration',
         loadComponent: () =>

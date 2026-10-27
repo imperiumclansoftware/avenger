@@ -208,10 +208,12 @@ p {
   accent-color: var(--accent);
 }
 
+input:not([type]),
 input[type='text'],
 input[type='email'],
 input[type='password'],
 input[type='url'],
+input[type='number'],
 select,
 textarea {
   width: 100%;

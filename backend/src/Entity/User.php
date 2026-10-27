@@ -29,9 +29,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private string $password = '';
 
+    /** An e-mail for each new ticket of any product */
+    #[ORM\Column(options: ['default' => true])]
+    private bool $notifyNewTickets = true;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $createdAt = null;
+
     public function __construct(string $email)
     {
         $this->email = mb_strtolower($email);
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
+    public function notifiesNewTickets(): bool
+    {
+        return $this->notifyNewTickets;
+    }
+
+    public function setNotifyNewTickets(bool $notify): void
+    {
+        $this->notifyNewTickets = $notify;
+    }
+
+    /** Null for the accounts created before it was recorded */
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
     }
 
     public function getId(): ?int

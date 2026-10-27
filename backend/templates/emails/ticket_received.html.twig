@@ -1,0 +1,10 @@
+{% extends 'emails/base.html.twig' %}
+{% block content %}
+  <p>Merci ! Votre ticket a bien été reçu par l'équipe de {{ product.name }} :</p>
+  {% include 'emails/_ticket.html.twig' %}
+  <p>Vous recevrez un e-mail quand son statut changera.</p>
+  {% if link %}{% include 'emails/_button.html.twig' with { link: link, label: 'Suivre le ticket' } %}{% endif %}
+{% endblock %}
+{% block footer %}
+  Vous recevez cet e-mail parce que cette adresse a été indiquée en ouvrant un ticket sur {{ product.name }}. Si ce n'est pas vous, ignorez-le.
+{% endblock %}

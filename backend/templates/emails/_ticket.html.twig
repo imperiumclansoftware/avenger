@@ -1,0 +1,11 @@
+<table role="presentation" width="100%" style="margin:16px 0;border:1px solid #e3e7f0;border-radius:8px;border-collapse:separate;">
+  <tr>
+    <td style="padding:14px 16px;">
+      <div style="font-size:13px;color:#5e6577;">{{ ticket.queue.name }} · ticket #{{ ticket.number }} · {{ product.name }}</div>
+      <div style="margin-top:4px;font-size:17px;font-weight:600;">{{ ticket.title }}</div>
+      {% if showDescription|default(false) %}
+        <div style="margin-top:10px;white-space:pre-wrap;font-size:15px;color:#2c3242;">{{ ticket.description|u.truncate(1500, '…') }}</div>
+      {% endif %}
+    </td>
+  </tr>
+</table>

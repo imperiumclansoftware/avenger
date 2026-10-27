@@ -34,7 +34,7 @@ security:
     access_control:
         # Private area
         - { path: ^/api/admin, roles: ROLE_ADMIN }
-        - { path: ^/api/me$, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/me(/|$), roles: IS_AUTHENTICATED_FULLY }
         # Public area: products, wikis and tickets
         - { path: ^/api, roles: PUBLIC_ACCESS }
 

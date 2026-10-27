@@ -1,16 +1,23 @@
-import { Component, inject } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterLink, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `
     <header class="admin-header">
       <div class="container bar">
         <a routerLink="/admin" class="brand">Avenger <span>admin</span></a>
-        <a routerLink="/">Voir le site</a>
-        <span class="user muted">{{ auth.user()?.email }}</span>
+        <nav class="admin-nav" aria-label="Administration">
+          <a routerLink="/admin" [class.active]="onProducts()" [attr.aria-current]="onProducts() ? 'page' : null">Produits</a>
+          <a routerLink="/admin/utilisateurs" routerLinkActive="active" ariaCurrentWhenActive="page">Utilisateurs</a>
+          <a routerLink="/admin/email" routerLinkActive="active" ariaCurrentWhenActive="page">E-mail</a>
+        </nav>
+        <a routerLink="/" class="site-link">Voir le site</a>
+        <a routerLink="/admin/compte" class="user" routerLinkActive="active" ariaCurrentWhenActive="page" title="Mon compte">{{ auth.user()?.email }}</a>
         <button class="btn small" type="button" (click)="auth.logout()">Déconnexion</button>
       </div>
     </header>
@@ -66,11 +73,31 @@ import { AuthService } from '../../core/auth/auth.service';
         vertical-align: middle;
       }
     }
-    .user {
+    .admin-nav {
+      display: flex;
+      gap: 0.25rem;
+
+      a {
+        padding: 0.35rem 0.75rem;
+        border-bottom: 2px solid transparent;
+
+        &.active {
+          color: var(--text);
+          border-bottom-color: var(--accent-bright);
+        }
+      }
+    }
+    .site-link {
       margin-left: auto;
+    }
+    .user {
       font-size: 0.9rem;
 
-      @media (width < 36rem) {
+      &.active {
+        color: var(--text);
+      }
+
+      @media (max-width: 36rem) {
         display: none;
       }
     }
@@ -81,4 +108,14 @@ import { AuthService } from '../../core/auth/auth.service';
 })
 export class AdminLayout {
   protected readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly url = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      map(() => this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+  /** The list and every product page */
+  protected readonly onProducts = computed(() => /^\/admin(\/produits.*)?(\?.*)?$/.test(this.url()));
 }

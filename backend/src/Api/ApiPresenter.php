@@ -26,6 +26,8 @@ final class ApiPresenter
             'id' => $user->getId(),
             'email' => $user->getEmail(),
             'admin' => $user->isAdmin(),
+            'notifyNewTickets' => $user->notifiesNewTickets(),
+            'createdAt' => $user->getCreatedAt()?->format(\DATE_ATOM),
         ];
     }
 
