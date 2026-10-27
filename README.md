@@ -38,35 +38,42 @@ scripts ni de gestionnaires d'événements.
 
 L'image `iemperor/avenger` contient toute l'application : l'interface Angular et l'API Symfony, servies par
 [FrankenPHP](https://frankenphp.dev) en HTTP sur le port 8080. Il lui faut une base PostgreSQL, prévue dans
-le fichier Compose.
+le fichier Compose. **Aucune variable n'est obligatoire.**
 
 ```bash
 mkdir avenger && cd avenger
 curl -O https://raw.githubusercontent.com/imperiumclansoftware/avenger/main/docker/compose.yaml
-curl -o .env https://raw.githubusercontent.com/imperiumclansoftware/avenger/main/docker/.env.example
-# Renseigner POSTGRES_PASSWORD dans .env (openssl rand -hex 32)
 docker compose up -d
 docker compose logs avenger | grep "Code d'installation"
 ```
+
+Au premier démarrage, le service `init` génère les secrets (mot de passe de la base, `APP_SECRET`,
+phrase de passe des clés de connexion) dans le volume `avenger_data`, puis s'arrête ; la base démarre avec
+ce mot de passe (`POSTGRES_PASSWORD_FILE`).
 
 Ouvrez ensuite `http://<serveur>:8080` : l'**assistant d'installation** (`/installation`) demande ce code,
 puis crée le premier administrateur et le connecte. Le code n'est lisible que sur le serveur (journaux, ou
 `docker compose exec avenger php bin/console app:setup:code`) : le premier venu ne peut pas s'attribuer le
 compte. Une fois l'administrateur créé, le code est détruit et l'assistant se ferme.
 
+Toutes les variables sont facultatives (fichier `.env` à côté de `compose.yaml`, modèle dans
+[docker/.env.example](docker/.env.example)) :
+
 | Variable | Rôle |
 |---|---|
-| `POSTGRES_PASSWORD` | **Obligatoire** : mot de passe de la base PostgreSQL. À conserver |
 | `AVENGER_PORT` | Port publié sur la machine hôte (8080 par défaut) |
 | `AVENGER_VERSION` | Étiquette de l'image (`latest` ou une version) |
-| `APP_SECRET`, `JWT_PASSPHRASE` | Facultatifs : générés au premier démarrage et conservés dans `/data/secrets` |
 | `TRUSTED_PROXIES` | Derrière un reverse proxy : ses adresses (ex. `172.16.0.0/12`), pour l'adresse réelle des visiteurs |
+| `APP_SECRET`, `JWT_PASSPHRASE`, `POSTGRES_PASSWORD` | Générés au premier démarrage et conservés dans `/data/secrets` ; une valeur fournie l'emporte |
+| `DATABASE_URL` | Base PostgreSQL externe, à la place de celle du fichier Compose |
 
-- **Données** : le volume `/data` conserve les secrets, les clés de connexion et les icônes ; la base est
-  dans son propre volume. Sauvegardez les deux.
-- **Démarrage** : le conteneur attend la base, applique les migrations, génère les secrets et les clés si
+- **Données** : le volume `/data` conserve les secrets (dont le mot de passe de la base), les clés de
+  connexion et les icônes ; la base est dans son propre volume. Sauvegardez les deux ensemble.
+- **Démarrage** : le conteneur attend la base, applique les migrations, génère les clés de connexion si
   besoin, et affiche le code d'installation tant qu'aucun administrateur n'existe. Il tourne sans
   privilège.
+- **Depuis la 0.1.0** : gardez votre `.env`, son `POSTGRES_PASSWORD` est celui de votre base ; il est
+  recopié dans le volume au premier démarrage.
 - **HTTPS** : placez l'image derrière un reverse proxy (Caddy, Traefik, Nginx Proxy Manager…) et
   renseignez `TRUSTED_PROXIES`.
 - **Mise à jour** : `docker compose pull && docker compose up -d` (migrations appliquées au démarrage).
