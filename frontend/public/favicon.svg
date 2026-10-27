@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.6">
+      <stop offset="0" stop-color="#10224d"/>
+      <stop offset="1" stop-color="#04060c"/>
+    </radialGradient>
+    <filter id="blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.2"/>
+    </filter>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#glow)"/>
+  <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="13.25" fill="none" stroke="#1f62f0" stroke-opacity="0.55" stroke-width="1.5"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" transform="translate(8 14) scale(1.5)">
+    <path d="M10 3 2 12l8 9M22 3l8 9-8 9M18 1l-4 22" stroke="#1f62f0" stroke-width="4" filter="url(#blur)"/>
+    <path d="M10 3 2 12l8 9M22 3l8 9-8 9M18 1l-4 22" stroke="#5c9bff" stroke-width="2.8"/>
+  </g>
+</svg>

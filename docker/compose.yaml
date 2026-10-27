@@ -1,0 +1,45 @@
+# Avenger with its database.
+#   Command line: cp .env.example .env (then set POSTGRES_PASSWORD), docker compose up -d
+#   Portainer: paste this file as a stack and enter the variables of .env.example in "Environment variables"
+#   Installation code: docker compose logs avenger | grep "Code d'installation"
+#                      (or docker compose exec avenger php bin/console app:setup:code)
+
+services:
+  avenger:
+    image: iemperor/avenger:${AVENGER_VERSION:-latest}
+    restart: unless-stopped
+    ports:
+      - "${AVENGER_PORT:-8080}:8080"
+    environment:
+      DATABASE_URL: postgresql://avenger:${POSTGRES_PASSWORD}@database:5432/avenger?serverVersion=16&charset=utf8
+      # Optional: generated on the first start and kept in the volume when empty
+      APP_SECRET: ${APP_SECRET:-}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE:-}
+      # Behind a reverse proxy: its addresses, for the visitors' real IP (rate limits)
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+    volumes:
+      - avenger_data:/data
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: avenger
+      POSTGRES_USER: avenger
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set (openssl rand -hex 32)}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "avenger", "-U", "avenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - database_data:/var/lib/postgresql/data
+
+volumes:
+  avenger_data:
+  database_data:

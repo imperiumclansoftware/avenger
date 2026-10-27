@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Démonstration du widget de tickets — Avenger</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <style>
+      :root { color-scheme: light dark; }
+      body { margin: 0; padding: 2rem 1rem; font: 1rem/1.6 system-ui, sans-serif; background: Canvas; color: CanvasText; }
+      main { max-width: 40rem; margin: 0 auto; }
+      code { font-family: ui-monospace, Menlo, Consolas, monospace; }
+      button { font: inherit; padding: 0.5rem 1rem; }
+      [role='status']:empty { display: none; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Démonstration du widget</h1>
+      <p>
+        Cette page joue le rôle de votre application : elle charge <code>widget.js</code> comme le code
+        d'intégration. Le bouton « Signaler un problème » apparaît en bas à droite.
+      </p>
+      <p><button type="button" id="own">Ouvrir avec mon propre bouton</button></p>
+      <p role="status" id="status"></p>
+    </main>
+    <script>
+      // The product comes from ?product=…, as data-product would in a real app
+      const product = new URLSearchParams(location.search).get('product') || '';
+      const tag = document.createElement('script');
+      tag.src = 'widget.js';
+      tag.dataset.product = product;
+      document.body.append(tag);
+
+      document.getElementById('own').addEventListener('click', () =>
+        window.AvengerTickets?.open({ type: 'feedback', name: 'Visiteur de démonstration' }),
+      );
+      window.addEventListener('avenger:ticket-created', (event) => {
+        document.getElementById('status').textContent =
+          `Événement avenger:ticket-created reçu : ticket #${event.detail.number} (${event.detail.url})`;
+      });
+    </script>
+  </body>
+</html>

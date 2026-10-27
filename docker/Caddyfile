@@ -1,0 +1,30 @@
+{
+	# HTTP only: put a reverse proxy in front for HTTPS
+	auto_https off
+	admin off
+	frankenphp
+}
+
+:8080 {
+	root * /app/public
+	encode zstd br gzip
+
+	# API: Symfony
+	@api path /api/*
+	handle @api {
+		php_server
+	}
+
+	# Angular application: files, or index.html for its routes
+	handle {
+		@html path / /index.html
+		header @html Cache-Control "no-cache"
+		# Hashed build files never change; widget.js keeps its name, so it is revalidated
+		header /chunk-*.js Cache-Control "public, max-age=31536000, immutable"
+		header /main-*.js Cache-Control "public, max-age=31536000, immutable"
+		header /styles-*.css Cache-Control "public, max-age=31536000, immutable"
+		header /widget.js Cache-Control "public, max-age=3600"
+		try_files {path} /index.html
+		file_server
+	}
+}

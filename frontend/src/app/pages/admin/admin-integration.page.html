@@ -1,0 +1,113 @@
+@if (context.product(); as product) {
+  <div class="doc">
+    <section>
+      <h2>Le widget de dépôt de tickets</h2>
+      <p>
+        Ajoutez un bouton <strong>« Signaler un problème »</strong> à {{ product.name }} : vos utilisateurs ouvrent un
+        ticket sans quitter l'application ni créer de compte. Le formulaire s'ouvre dans une fenêtre par-dessus
+        l'application ; les tickets arrivent dans l'onglet <em>Tickets</em> de ce produit.
+      </p>
+      @if (!product.published) {
+        <p class="warning" role="note">
+          ⚠ Ce produit n'est pas publié : le widget affichera « produit introuvable » tant que vous ne l'aurez pas
+          publié (onglet <em>Page d'accueil</em>).
+        </p>
+      }
+      <p class="actions">
+        <a class="btn" [href]="demoUrl()" target="_blank" rel="noopener">Essayer le widget ↗</a>
+      </p>
+    </section>
+
+    <section>
+      <h3>1. Le code minimal</h3>
+      <p>Collez cette ligne dans les pages de votre application, juste avant <code>&lt;/body&gt;</code> :</p>
+      <app-code-block [code]="basic()" />
+      <p class="muted">Le bouton apparaît en bas à droite. Avenger n'est contacté qu'à l'ouverture du formulaire.</p>
+    </section>
+
+    <section>
+      <h3>2. Pré-remplir l'utilisateur connecté</h3>
+      <p>
+        Si votre application connaît l'utilisateur, transmettez son nom et son e-mail : il n'aura pas à les saisir.
+        Ils ne passent pas par l'adresse de l'iframe, seulement par un message réservé à Avenger.
+      </p>
+      <app-code-block [code]="prefill()" />
+    </section>
+
+    <section>
+      <h3>3. Utiliser votre propre bouton</h3>
+      <p>
+        Avec <code>data-button="false"</code>, le bouton flottant disparaît : ouvrez le formulaire depuis un menu ou
+        un lien de votre application.
+      </p>
+      <app-code-block [code]="ownButton()" />
+    </section>
+
+    <section>
+      <h3>4. Dans une application Angular</h3>
+      <p>Un service qui charge le script au premier clic, puis ouvre le formulaire avec l'utilisateur connecté :</p>
+      <app-code-block [code]="angular()" />
+    </section>
+
+    <section>
+      <h3>Options</h3>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr><th>Attribut</th><th>Valeur</th><th>Rôle</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>data-product</code></td><td><code>{{ product.slug }}</code></td><td>Obligatoire : le produit qui reçoit les tickets</td></tr>
+            <tr><td><code>data-type</code></td><td><code>bug</code>, <code>feedback</code>, <code>feature</code></td><td>File proposée par défaut (bug sinon)</td></tr>
+            <tr><td><code>data-label</code></td><td>texte</td><td>Texte du bouton et titre de la fenêtre (« Signaler un problème »)</td></tr>
+            <tr><td><code>data-position</code></td><td><code>bottom-right</code>, <code>bottom-left</code></td><td>Coin du bouton flottant</td></tr>
+            <tr><td><code>data-button</code></td><td><code>false</code></td><td>Pas de bouton flottant : ouverture par <code>AvengerTickets.open()</code></td></tr>
+            <tr><td><code>data-name</code>, <code>data-email</code></td><td>texte</td><td>Pré-remplissage de l'auteur, pour une page générée côté serveur</td></tr>
+            <tr><td><code>data-page-url</code></td><td><code>false</code></td><td>Ne pas joindre au ticket l'adresse de la page (sans paramètres ni fragment)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h3>API JavaScript</h3>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr><th>Méthode</th><th>Rôle</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>AvengerTickets.open(&#123; type, name, email &#125;)</code></td><td>Ouvre le formulaire ; les options sont facultatives</td></tr>
+            <tr><td><code>AvengerTickets.set(&#123; type, name, email &#125;)</code></td><td>Change le pré-remplissage, par exemple après la connexion</td></tr>
+            <tr><td><code>AvengerTickets.close()</code></td><td>Ferme le formulaire</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Après chaque envoi, la page reçoit l'événement <code>avenger:ticket-created</code> :</p>
+      <app-code-block [code]="event" />
+    </section>
+
+    <section>
+      <h3>Sécurité</h3>
+      <ul>
+        <li>
+          Le formulaire est servi par Avenger dans un iframe isolé : il n'a accès ni aux données ni aux cookies de
+          votre application, et ne peut pas la rediriger.
+        </li>
+        <li>
+          Les deux côtés n'acceptent que les messages de la fenêtre et de l'origine attendues ; l'e-mail de
+          l'utilisateur n'apparaît dans aucune adresse.
+        </li>
+        <li>
+          L'envoi est limité à 10 tickets par quart d'heure et par adresse IP, comme sur le site public.
+        </li>
+      </ul>
+      <p>Si votre application impose une politique de sécurité du contenu (CSP), autorisez Avenger :</p>
+      <app-code-block [code]="csp()" />
+      <p class="muted">
+        Côté Avenger, les pages <code>/widget/…</code> doivent pouvoir être affichées dans un iframe : n'ajoutez pas
+        d'en-tête <code>X-Frame-Options</code> ou <code>frame-ancestors</code> qui l'interdirait.
+      </p>
+    </section>
+  </div>
+}

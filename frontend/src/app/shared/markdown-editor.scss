@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+
+  button {
+    border: 1px solid transparent;
+    background: none;
+    color: var(--text-muted);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+
+    &[aria-selected='true'] {
+      color: var(--text);
+      border-color: var(--border);
+      background: var(--surface);
+    }
+  }
+
+  .hint {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+}
+
+textarea {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.preview {
+  min-height: 10rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
