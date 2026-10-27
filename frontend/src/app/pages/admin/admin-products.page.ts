@@ -1,18 +1,24 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { apiErrorMessage } from '../../core/api/api-error';
 import { ProductSummary } from '../../core/api/models';
 import { AdminProductsService } from '../../core/products/admin-products.service';
 import { ProductIcon } from '../../shared/product-icon';
+import { Product } from '../../core/api/models';
+import { ProductImportDialog } from './product-import-dialog';
 
 @Component({
   selector: 'app-admin-products-page',
-  imports: [RouterLink, ProductIcon],
+  imports: [RouterLink, ProductIcon, ProductImportDialog],
   template: `
     <div class="head">
       <h1>Produits</h1>
-      <a class="btn primary" routerLink="/admin/produits/nouveau">Nouveau produit</a>
+      <div class="actions">
+        <button class="btn" type="button" (click)="importDialog.open()">Importer un produit</button>
+        <a class="btn primary" routerLink="/admin/produits/nouveau">Nouveau produit</a>
+      </div>
     </div>
+    <app-product-import-dialog #importDialog (imported)="imported($event)" />
     @if (error()) {
       <p class="error">{{ error() }}</p>
     } @else if (products(); as products) {
@@ -73,6 +79,7 @@ import { ProductIcon } from '../../shared/product-icon';
 })
 export class AdminProductsPage {
   private readonly adminProducts = inject(AdminProductsService);
+  private readonly router = inject(Router);
 
   protected readonly products = signal<ProductSummary[] | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -82,6 +89,10 @@ export class AdminProductsPage {
       (products) => this.products.set(products),
       (e: unknown) => this.error.set(apiErrorMessage(e)),
     );
+  }
+
+  protected imported(product: Product): void {
+    void this.router.navigate(['/admin/produits', product.id]);
   }
 
   protected date(iso: string): string {

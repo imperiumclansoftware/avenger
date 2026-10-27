@@ -4,6 +4,10 @@ namespace App\Controller;
 
 use App\Api\ApiPresenter;
 use App\Api\Problem;
+use App\Archive\InvalidArchiveException;
+use App\Archive\ProductArchiver;
+use App\Dto\Archive\ProductArchive;
+use App\Dto\ProductImportOptions;
 use App\Dto\ProductRequest;
 use App\Entity\Product;
 use App\Product\InvalidIconException;
@@ -15,6 +19,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Attribute\MapUploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
@@ -67,6 +74,43 @@ final class AdminProductController extends AbstractController
         }
 
         return $this->json($this->presenter->product($product));
+    }
+
+    /**
+     * The product in one file, to import into another Avenger. The tickets (with the authors'
+     * e-mails) only when asked for.
+     */
+    #[Route('/{id<\d+>}/export', name: 'api_admin_product_export', methods: ['GET'])]
+    public function export(Product $product, ProductArchiver $archiver, #[MapQueryParameter] bool $tickets = false): JsonResponse
+    {
+        $response = new JsonResponse($archiver->export($product, $tickets));
+        $response->setEncodingOptions(\JSON_PRETTY_PRINT | \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+        $response->headers->set('Content-Disposition', $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            \sprintf('avenger-%s-%s.json', $product->getSlug(), date('Y-m-d')),
+        ));
+
+        return $response;
+    }
+
+    /** Creates a product from the export of another Avenger, as a draft. */
+    #[Route('/import', name: 'api_admin_product_import', methods: ['POST'])]
+    public function import(
+        #[MapRequestPayload] ProductArchive $archive,
+        ProductArchiver $archiver,
+        #[MapQueryString] ProductImportOptions $options = new ProductImportOptions(),
+    ): JsonResponse {
+        try {
+            $product = $archiver->import($archive, $options->slug);
+        } catch (SlugTakenException $e) {
+            return Problem::violation('slug', $e->getMessage().' Choisissez une autre adresse pour ce produit.');
+        } catch (InvalidIconException $e) {
+            return Problem::violation('product.icon', $e->getMessage());
+        } catch (InvalidArchiveException $e) {
+            return Problem::violation($e->propertyPath, $e->getMessage());
+        }
+
+        return $this->json($this->presenter->product($product), 201);
     }
 
     /** Replaces the icon (multipart, field "icon"). */

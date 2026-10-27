@@ -502,3 +502,32 @@ input[type='radio'] {
     outline: 2px solid Highlight;
   }
 }
+
+/* Modal dialogs (shared/modal.ts) */
+dialog[appModal] {
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--glow-soft);
+
+  h2 {
+    margin-top: 0;
+    font-size: 1.3rem;
+  }
+}
+
+/* No scroll chaining to the page behind the modal */
+dialog[appModal]:modal {
+  overscroll-behavior: contain;
+}
+
+dialog[appModal]::backdrop {
+  background: rgb(4 6 12 / 0.7);
+  backdrop-filter: blur(2px);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}

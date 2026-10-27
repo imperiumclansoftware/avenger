@@ -4,11 +4,12 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { apiErrorMessage } from '../../core/api/api-error';
 import { AdminProductsService } from '../../core/products/admin-products.service';
 import { ProductIcon } from '../../shared/product-icon';
+import { ProductExportDialog } from './product-export-dialog';
 import { AdminProductContext } from './admin-product-context';
 
 @Component({
   selector: 'app-admin-product-layout',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, ProductIcon],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, ProductIcon, ProductExportDialog],
   providers: [AdminProductContext],
   template: `
     <p><a routerLink="/admin">← Produits</a></p>
@@ -25,6 +26,7 @@ import { AdminProductContext } from './admin-product-context';
           @if (product.published) {
             <a class="btn small" [routerLink]="['/produits', product.slug]" target="_blank">Voir la page publique</a>
           }
+          <button class="btn small" type="button" (click)="exportDialog.open()">Exporter</button>
           <button class="btn small danger" type="button" [disabled]="deleting()" (click)="remove()">Supprimer</button>
         </div>
       </header>
@@ -38,6 +40,7 @@ import { AdminProductContext } from './admin-product-context';
         <a [routerLink]="[base(), 'integration']" routerLinkActive="active">Intégration</a>
       </nav>
       <router-outlet />
+      <app-product-export-dialog #exportDialog [product]="product" />
     } @else {
       <p class="muted">Chargement…</p>
     }

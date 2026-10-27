@@ -129,6 +129,13 @@ class Ticket
         return $this->authorEmail;
     }
 
+    /** Import (ProductArchiver): the dates of the original site. */
+    public function restoreDates(?\DateTimeImmutable $createdAt, ?\DateTimeImmutable $updatedAt): void
+    {
+        $this->createdAt = $createdAt ?? $this->createdAt;
+        $this->updatedAt = $updatedAt ?? $this->updatedAt;
+    }
+
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;

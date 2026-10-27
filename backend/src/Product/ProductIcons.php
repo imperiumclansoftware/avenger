@@ -22,6 +22,9 @@ final class ProductIcons
         'image/svg+xml' => 'svg',
     ];
 
+    /** Same limit as the upload (AdminProductController::uploadIcon) */
+    public const MAX_SIZE = 1024 * 1024;
+
     /** File names handed out by this class */
     public const FILE_PATTERN = '[a-f0-9]{32}\.(?:png|jpg|webp|gif|svg)';
 
@@ -40,19 +43,51 @@ final class ProductIcons
      */
     public function replace(Product $product, UploadedFile $upload): void
     {
-        $extension = self::TYPES[(string) $upload->getMimeType()] ?? throw new InvalidIconException('Format d\'image non pris en charge.');
-        if ('svg' === $extension) {
-            $this->assertSafeSvg((string) file_get_contents($upload->getPathname()));
-        }
+        $this->replaceWithContent($product, (string) file_get_contents($upload->getPathname()));
+    }
 
+    /**
+     * Same checks as an upload: the type is detected from the content, not trusted.
+     *
+     * @throws InvalidIconException
+     */
+    public function replaceWithContent(Product $product, string $content): void
+    {
+        $extension = $this->extensionOf($content);
         $file = bin2hex(random_bytes(16)).'.'.$extension;
-        $this->filesystem->mkdir($this->directory);
-        $upload->move($this->directory, $file);
+        $this->filesystem->dumpFile($this->directory.'/'.$file, $content);
 
         $previous = $product->getIconFile();
         $product->setIconFile($file);
         $this->em->flush();
         $this->delete($previous);
+    }
+
+    /**
+     * The extension to store an icon under, once checked.
+     *
+     * @throws InvalidIconException
+     */
+    public function extensionOf(string $content): string
+    {
+        if ('' === $content || \strlen($content) > self::MAX_SIZE) {
+            throw new InvalidIconException('L\'icône doit faire entre 1 octet et 1 Mo.');
+        }
+        $type = (new \finfo(\FILEINFO_MIME_TYPE))->buffer($content);
+        $extension = self::TYPES[(string) $type] ?? throw new InvalidIconException('Formats acceptés : PNG, JPEG, WebP, GIF ou SVG.');
+        if ('svg' === $extension) {
+            $this->assertSafeSvg($content);
+        }
+
+        return $extension;
+    }
+
+    /** Content of the product's icon, for an export. */
+    public function read(Product $product): ?string
+    {
+        $path = null === $product->getIconFile() ? null : $this->path($product->getIconFile());
+
+        return null === $path ? null : (string) file_get_contents($path);
     }
 
     public function remove(Product $product): void

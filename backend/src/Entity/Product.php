@@ -152,6 +152,24 @@ class Product
         throw new \LogicException(\sprintf('Product "%s" has no "%s" queue.', $this->slug, $type->value));
     }
 
+    /** Import (ProductArchiver): numbering goes on after the imported tickets. */
+    public function continueNumberingAfter(int $number): void
+    {
+        $this->ticketCounter = max($this->ticketCounter, $number);
+    }
+
+    public function getTicketCounter(): int
+    {
+        return $this->ticketCounter;
+    }
+
+    /** Import (ProductArchiver): the dates of the original site. */
+    public function restoreDates(?\DateTimeImmutable $createdAt, ?\DateTimeImmutable $updatedAt): void
+    {
+        $this->createdAt = $createdAt ?? $this->createdAt;
+        $this->updatedAt = $updatedAt ?? $this->updatedAt;
+    }
+
     /** To be called with the product locked, see TicketManager. */
     public function nextTicketNumber(): int
     {

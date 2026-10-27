@@ -47,6 +47,26 @@ export class AdminProductsService {
     return firstValueFrom(this.http.delete<Product>(`api/admin/products/${id}/icon`));
   }
 
+  /** The product in one file (see ProductArchiver), with its tickets if asked. */
+  async exportProduct(id: number, withTickets: boolean): Promise<{ file: Blob; name: string }> {
+    const response = await firstValueFrom(
+      this.http.get(`api/admin/products/${id}/export`, {
+        params: withTickets ? { tickets: '1' } : {},
+        responseType: 'blob',
+        observe: 'response',
+      }),
+    );
+    const name = /filename="?([^";]+)"?/.exec(response.headers.get('Content-Disposition') ?? '')?.[1] ?? 'avenger-produit.json';
+    return { file: response.body!, name };
+  }
+
+  /** Creates the product of an export (as a draft), under another address if given. */
+  importProduct(archive: unknown, slug?: string | null): Promise<Product> {
+    return firstValueFrom(
+      this.http.post<Product>('api/admin/products/import', archive, { params: slug ? { slug } : {} }),
+    );
+  }
+
   remove(id: number): Promise<void> {
     return firstValueFrom(this.http.delete<void>(`api/admin/products/${id}`));
   }

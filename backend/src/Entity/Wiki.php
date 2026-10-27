@@ -52,6 +52,17 @@ class Wiki
         return $this->pages;
     }
 
+    public function getHome(): WikiPage
+    {
+        foreach ($this->pages as $page) {
+            if ($page->isHome()) {
+                return $page;
+            }
+        }
+
+        throw new \LogicException('A wiki always has its home page.');
+    }
+
     public function addPage(WikiPage $page): void
     {
         $this->pages->add($page);

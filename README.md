@@ -28,6 +28,12 @@ de tickets (bugs, retours utilisateurs, demandes de fonctionnalités).
   - Tickets : changer le statut (nouveau, accepté, en cours, résolu, refusé, fermé), déplacer un
     ticket dans une autre file, supprimer un ticket.
 
+- **Import / export d'un produit**, pour le passer d'un Avenger à un autre : *Exporter* sur la page d'un
+  produit télécharge un fichier JSON (page d'accueil, icône, wiki et, si on coche la case, les tickets avec
+  leurs numéros, statuts, dates et auteurs) ; *Produits › Importer un produit* le recrée **en brouillon**,
+  sous une autre adresse si la sienne est prise. Le fichier est entièrement validé (format, version, champs,
+  icône) avant que quoi que ce soit soit créé. Les tickets contiennent les e-mails de leurs auteurs : leur
+  export est un choix explicite.
 - **Widget de dépôt de tickets** : une ligne de code ajoute un bouton « Signaler un problème » à
   l'application d'un produit (onglet *Intégration* de l'administration). Voir [docs/widget.md](docs/widget.md).
 
@@ -118,6 +124,8 @@ npm start                            # http://localhost:4300, /api est relayé v
 | GET/PUT/DELETE | `/api/admin/products/{id}/wiki/{pageId}`       | admin  |
 | GET     | `/api/admin/products/{id}/tickets[?type=&status=]`    | admin  |
 | PUT/DELETE | `/api/admin/products/{id}/tickets/{number}`        | admin  |
+| GET     | `/api/admin/products/{id}/export[?tickets=1]`         | admin  |
+| POST    | `/api/admin/products/import[?slug=]` (corps : le fichier exporté) | admin  |
 
 ## Tests
 
