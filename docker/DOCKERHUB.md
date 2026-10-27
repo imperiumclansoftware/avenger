@@ -14,6 +14,9 @@ français :
   propres applications, prérempli avec l'utilisateur connecté
 - **Administration** : produits publiés ou en brouillon, éditeur Markdown avec aperçu, gestion des
   tickets (statut, changement de file), code d'intégration du widget prêt à copier
+- **Plusieurs administrateurs et e-mails** : comptes gérés en ligne, service de mail configuré dans
+  l'interface (SMTP avec réglages tout prêts, test pas à pas), notification des nouveaux tickets et suivi
+  par e-mail pour leurs auteurs
 - **Import / export** : un produit passe d'un Avenger à un autre en un fichier (page, icône, wiki et, au
   choix, les tickets)
 - **Installation sans configuration** : aucune variable obligatoire, un assistant crée le premier
@@ -27,7 +30,8 @@ fournie par le fichier Compose ci-dessous.
 
 | Tag | Contenu |
 |---|---|
-| `0.3.0`, `latest` | Import / export d'un produit pour le passer d'un Avenger à un autre (page, icône, wiki, tickets au choix) |
+| `0.4.0`, `latest` | Administrateurs gérés en ligne, service de mail dans l'interface, notifications des tickets par e-mail ; interface plus accessible |
+| `0.3.0` | Import / export d'un produit pour le passer d'un Avenger à un autre (page, icône, wiki, tickets au choix) |
 | `0.2.0` | Aucune variable obligatoire : le mot de passe de la base est généré lui aussi au premier démarrage |
 | `0.1.0` | Première version : projets, wiki, tickets, widget, icônes, assistant d'installation |
 
@@ -219,7 +223,7 @@ Documentation complète : [docs/widget.md](https://github.com/imperiumclansoftwa
 - **Santé** : `GET /api/health` (healthcheck de l'image).
 - **Limites** : 10 tickets par quart d'heure et par adresse IP ; 10 essais du code d'installation par
   quart d'heure et par adresse.
-- **Autres comptes administrateurs** :
+- **Autres comptes administrateurs** : page *Utilisateurs* de l'administration, ou
   `docker compose exec avenger php bin/console app:admin:create <e-mail>` (mot de passe saisi masqué).
 
 ## Dépannage

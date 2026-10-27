@@ -96,7 +96,8 @@ Toutes les variables sont facultatives (fichier `.env` à côté de `compose.yam
 - **HTTPS** : placez l'image derrière un reverse proxy (Caddy, Traefik, Nginx Proxy Manager…) et
   renseignez `TRUSTED_PROXIES`.
 - **Mise à jour** : `docker compose pull && docker compose up -d` (migrations appliquées au démarrage).
-- **Autres comptes** : `docker compose exec avenger php bin/console app:admin:create <e-mail>`.
+- **Autres comptes** : page *Utilisateurs* de l'administration, ou
+  `docker compose exec avenger php bin/console app:admin:create <e-mail>`.
 - **Construire l'image** : `docker build --build-arg APP_VERSION=1.0.0 -t iemperor/avenger:1.0.0 .` à la
   racine du dépôt (`Dockerfile`, fichiers dans `docker/`).
 
