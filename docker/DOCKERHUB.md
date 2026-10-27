@@ -14,6 +14,8 @@ français :
   propres applications, prérempli avec l'utilisateur connecté
 - **Administration** : produits publiés ou en brouillon, éditeur Markdown avec aperçu, gestion des
   tickets (statut, changement de file), code d'intégration du widget prêt à copier
+- **Import / export** : un produit passe d'un Avenger à un autre en un fichier (page, icône, wiki et, au
+  choix, les tickets)
 - **Installation sans configuration** : aucune variable obligatoire, un assistant crée le premier
   administrateur
 
@@ -25,7 +27,8 @@ fournie par le fichier Compose ci-dessous.
 
 | Tag | Contenu |
 |---|---|
-| `0.2.0`, `latest` | Aucune variable obligatoire : le mot de passe de la base est généré lui aussi au premier démarrage |
+| `0.3.0`, `latest` | Import / export d'un produit pour le passer d'un Avenger à un autre (page, icône, wiki, tickets au choix) |
+| `0.2.0` | Aucune variable obligatoire : le mot de passe de la base est généré lui aussi au premier démarrage |
 | `0.1.0` | Première version : projets, wiki, tickets, widget, icônes, assistant d'installation |
 
 Plateforme : `linux/amd64`. Sources : [GitHub](https://github.com/imperiumclansoftware/avenger), licence MIT.
